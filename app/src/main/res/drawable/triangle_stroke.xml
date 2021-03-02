@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="80dp"
+    android:width="80dp"
+    android:viewportHeight="100"
+    android:viewportWidth="120" >
+    <group
+        android:name="triangleGroup">
+        <path
+            android:name="triangle"
+            android:strokeColor="#FF0000"
+            android:strokeWidth="4"
+            android:fillColor="@android:color/white"
+            android:pathData="m 60,0 l 50,100 -100,0 z" />
+    </group>
+</vector>
