@@ -9,12 +9,11 @@ import android.graphics.PointF;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
-
 import androidx.annotation.RequiresApi;
-
 import java.util.ArrayList;
 import java.util.List;
 
+/* Drawing view operations - draw , ontouch , color changes, shape changer */
 public class DrawingView extends View {
 
     public static Context context;
@@ -31,6 +30,7 @@ public class DrawingView extends View {
     float mEndY;
     private PointF startPoint, endPoint;
 
+    //constructor
     public DrawingView(Context c) {
         //add drawing view to the screen
         super(c);
@@ -44,6 +44,8 @@ public class DrawingView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(12);
     }
+
+    //getter setter to change shape and color fields
     public static Paint GetPaintObject()
     {
         return mPaint;
@@ -67,19 +69,11 @@ public class DrawingView extends View {
         mCanvas = new Canvas(mBitmap);
     }
 
-    public Bitmap getBitmap()
-    {
-        this.setDrawingCacheEnabled(true);
-        this.buildDrawingCache();
-        Bitmap bmp = Bitmap.createBitmap(this.getDrawingCache());
-        this.setDrawingCacheEnabled(false);
-        return bmp;
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(selectedShape.equals("Line")) {
+        //handle all line case other than line
+        if(selectedShape.equals(Shape.Line)) {
             path = new Path();
             switch (event.getAction())
             {
@@ -104,10 +98,18 @@ public class DrawingView extends View {
                     break;
             }
             return true;
-        }  else if (selectedShape.equals("Rectangle Solid") || selectedShape.equals("Rectangle Stroke")) {
+        }
+        //handle all other shapes other than line
+        else  {
             boolean isFill = false;
-            if (selectedShape.equals("Rectangle Solid"))
+            boolean isCircle = false;
+            if (selectedShape.equals(Shape.RectangleSolid)||
+                    selectedShape.equals(Shape.OvalSolid) ||
+                    selectedShape.equals(Shape.TriangleSolid))
                 isFill = true;
+            if (selectedShape.equals(Shape.OvalSolid)|| selectedShape.equals(Shape.OvalStroke))
+                isCircle = true;
+
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = event.getX();
@@ -121,7 +123,10 @@ public class DrawingView extends View {
                     mEndX = event.getX();
                     mEndY = event.getY();
                     path = new Path();
-                    path.addRect(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
+                    if(!isCircle)
+                        path.addRect(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
+                    else
+                        path.addOval(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
                     pathList.add(new PathTracker(path, mStartX, mStartY, mEndX, mEndY,
                             selectedShape, selectedColor, isFill));
                     path = new Path();
@@ -130,34 +135,7 @@ public class DrawingView extends View {
                     return false;
             }
             return true;
-        }else if (selectedShape.equals("Circle Solid") || selectedShape.equals("Circle Stroke")) {
-            boolean isFill = false;
-            if (selectedShape.equals("Circle Solid"))
-                isFill = true;
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    mStartX = event.getX();
-                    mStartY = event.getY();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    mEndX = event.getX();
-                    mEndY = event.getY();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    mEndX = event.getX();
-                    mEndY = event.getY();
-                    path = new Path();
-                    path.addOval(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
-                    pathList.add(new PathTracker(path, mStartX, mStartY, mEndX, mEndY,
-                            selectedShape, selectedColor, isFill));
-                    path = new Path();
-                    break;
-                default:
-                    return false;
-            }
-            return true;
-        }else
-            return true;
+        }
     }
 
     @Override

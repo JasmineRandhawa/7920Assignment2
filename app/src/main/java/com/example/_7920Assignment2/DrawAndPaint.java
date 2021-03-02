@@ -20,7 +20,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import java.util.ArrayList;
 
-
+/* Draw and Paint Shapes
+ Four chapes are used with unfill anf fill funtionality
+ Shapes Used: Line, Rectangle/Square, Oval/Circle and Triangle */
 public class DrawAndPaint extends AppCompatActivity {
     DrawingView dv;
     Context context;
@@ -29,6 +31,7 @@ public class DrawAndPaint extends AppCompatActivity {
     Shape selectedShapeListItem;
     ArrayList<Shape> shapes;
 
+    //add shapes, color palette , drawing view and clear button
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +53,7 @@ public class DrawAndPaint extends AppCompatActivity {
 
     }
 
+    //add  color palette  to screen
     private void CreateColorPalette()
     {
         GridView colorPalletteGrid = (GridView) findViewById(R.id.colorGrid);
@@ -65,16 +69,16 @@ public class DrawAndPaint extends AppCompatActivity {
         });
     }
 
+    //add  shapes palette  to screen
     private void CreateShapesView()
     {
-        shapes.add(new Shape("Line",R.drawable.line,0));
-        shapes.add(new Shape("Rectangle Solid",R.drawable.rectangle_solid,1));
-        shapes.add(new Shape("Rectangle Stroke",R.drawable.rectangle_stroke,2));
-        shapes.add(new Shape("Circle Solid",R.drawable.circle_solid,3));
-        shapes.add(new Shape("Circle Stroke",R.drawable.circle_stroke,4));
-        shapes.add(new Shape("Triangle Solid",R.drawable.triangle_solid,5));
-        shapes.add(new Shape("Triangle Stroke",R.drawable.triangle_stroke,6));
-
+        shapes.add(new Shape(Shape.Line,R.drawable.line,0));
+        shapes.add(new Shape(Shape.RectangleSolid,R.drawable.rectangle_solid,1));
+        shapes.add(new Shape(Shape.RectangleStroke,R.drawable.rectangle_stroke,2));
+        shapes.add(new Shape(Shape.OvalSolid,R.drawable.oval_solid,3));
+        shapes.add(new Shape(Shape.OvalStroke,R.drawable.oval_stroke,4));
+        shapes.add(new Shape(Shape.TriangleSolid,R.drawable.triangle_solid,5));
+        shapes.add(new Shape(Shape.TriangleStroke,R.drawable.triangle_stroke,6));
 
         ShapeListAdapter shapesAdapter = new ShapeListAdapter(this,shapes);
         ListView listview_shapes = (ListView) findViewById(R.id.listview_shapes);
@@ -88,6 +92,7 @@ public class DrawAndPaint extends AppCompatActivity {
 
     }
 
+    //add  drawng view  to screen
     private void CreateDrawingView()
     {
         drawingViewLayout = findViewById(R.id.drawingViewLayout);
@@ -97,6 +102,7 @@ public class DrawAndPaint extends AppCompatActivity {
         drawingViewLayout.addView(dv);
     }
 
+    //add  clear button
     public void CreateClearButton()
     {
         TextView textView = (TextView) findViewById(R.id.btnClearAll);
@@ -105,6 +111,7 @@ public class DrawAndPaint extends AppCompatActivity {
         textView.setText(content);
     }
 
+    //clear Drawing View
     private void clearAllDrawingView(View view) {
         drawingViewLayout.removeView(dv);
         dv = new DrawingView(context);
@@ -113,6 +120,7 @@ public class DrawAndPaint extends AppCompatActivity {
         drawingViewLayout.addView(dv);
     }
 
+    //shape list adapter to bind listview containing all shapes
     public class ShapeListAdapter extends ArrayAdapter<Shape> {
 
         public ShapeListAdapter(Activity context, ArrayList<Shape> shapes) {

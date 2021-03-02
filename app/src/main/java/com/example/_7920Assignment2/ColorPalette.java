@@ -10,9 +10,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/*Color palette class for populating color picker on drawing screen*/
 public class ColorPalette {
 
-    //get all colors for collor pallette
+    //get all colors for color pallette
     public static ArrayList HSVColors() {
         ArrayList<Integer> colors = new ArrayList<>();
 

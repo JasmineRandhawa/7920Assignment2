@@ -2,42 +2,44 @@ package com.example._7920Assignment2;
 
 import java.util.ArrayList;
 
+/* Shape class for storing shape data */
 public class Shape {
 
     public String ShapeName;
     public long ResourceId;
     public long Position;
+    public static String RectangleStroke = "Rectangle Solid";
+    public static String RectangleSolid = "Rectangle Stroke";
+    public static String OvalSolid = "Oval Solid";
+    public static String OvalStroke = "Oval Stroke";
+    public static String TriangleSolid = "Triangle Solid";
+    public static String TriangleStroke = "Triangle Stroke";
+    public static String Line = "Line";
 
+    //constructor of shape class
     public Shape(String shapeName, long resourceId, long position) {
         ShapeName = shapeName;
         ResourceId = resourceId;
         Position = position;
     }
+
+    //getter amnd setters of shape class fields
     public String getShapeName() {
         return ShapeName;
     }
 
-    public void setShapeName(String shapeName) {
-        ShapeName = shapeName;
-    }
 
     public long getResourceId() {
         return ResourceId;
     }
 
-    public void setResourceId(long resourceId) {
-        ResourceId = resourceId;
-    }
 
     public long getPosition() {
         return Position;
     }
 
-    public void setPosition(long position) {
-        Position = position;
-    }
 
-
+    // get shape selected based on listviewitem index position
     public static Shape GetItemForAtPosition(int position,ArrayList<Shape> shapes) {
 
         for(Shape item:shapes)
@@ -47,4 +49,5 @@ public class Shape {
         }
         return null;
     }
+
 }
