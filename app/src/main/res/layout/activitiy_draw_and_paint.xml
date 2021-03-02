@@ -33,20 +33,20 @@
         <ListView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/listview_shapes"
             android:choiceMode="singleChoice"
+            android:listSelector="@android:color/holo_blue_light"
             android:layout_width="100dp"
-            android:layout_height="1080dp"
+            android:layout_height="800dp"
             android:paddingBottom="10dp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/drawingView"
             android:layout_width="match_parent"
             android:background="@android:color/white"
-            android:layout_height="1080dp">
+            android:layout_height="800dp">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
-
 
 
     <TextView

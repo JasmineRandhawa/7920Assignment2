@@ -9,7 +9,5 @@
     <ImageView
         android:id="@+id/shape"
         android:layout_width="50dp"
-        android:clickable="true"
-        android:focusable="true"
         android:layout_height="50dp"/>
 </LinearLayout>
