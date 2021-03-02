@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -49,28 +50,36 @@ public class DrawingView extends View {
     }
 
 
+    private Paint paint;
+    private PointF startPoint, endPoint;
+    private boolean isDrawing;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if(selectedShape.equals("Line")) {
-            if (event.getHistorySize() == 0) {
-                x = event.getX();
-                y = event.getY();
-            }
-            if (x == 0 && y == 0) {
-                x = event.getX();
-                y = event.getY();
-            }
-            mX=event.getX();
-            mY=event.getY();
             path = new Path();
-            Path path = new Path();
-            path.moveTo(x,y);
-            path.moveTo(mX,mY);
-            path.lineTo(x,y);
-            path.lineTo(mX,mY);
-            pathList.add(path);
-            path = new Path();
+            switch (event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    startPoint = new PointF(event.getX(), event.getY());
+                    endPoint = new PointF();
+                    path = new Path();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                        endPoint.x = event.getX();
+                        endPoint.y = event.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                        endPoint.x = event.getX();
+                        endPoint.y = event.getY();
+                        path.moveTo(startPoint.x, startPoint.y);
+                        path.lineTo(endPoint.x, endPoint.y);
+                        pathList.add(path);
+                    break;
+                default:
+                    break;
+            }
             return true;
+
         }
         else {
 
