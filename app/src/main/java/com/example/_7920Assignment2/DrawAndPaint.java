@@ -60,7 +60,7 @@ public class DrawAndPaint extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 selectedColor = parent.getItemAtPosition(position).toString();
-                DrawingView.GetPaintObject().setColor(Integer.parseInt(selectedColor));
+                DrawingView.SetPaintColor(Integer.parseInt(selectedColor));
             }
         });
     }
@@ -70,12 +70,10 @@ public class DrawAndPaint extends AppCompatActivity {
         shapes.add(new Shape("Line",R.drawable.line,0));
         shapes.add(new Shape("Rectangle Solid",R.drawable.rectangle_solid,1));
         shapes.add(new Shape("Rectangle Stroke",R.drawable.rectangle_stroke,2));
-        shapes.add(new Shape("Square Solid",R.drawable.square_solid,3));
-        shapes.add(new Shape("Square Stroke",R.drawable.square_stroke,4));
-        shapes.add(new Shape("Circle Solid",R.drawable.circle_solid,5));
-        shapes.add(new Shape("Circle Stroke",R.drawable.circle_stroke,6));
-        shapes.add(new Shape("Triangle Solid",R.drawable.triangle_solid,7));
-        shapes.add(new Shape("Triangle Stroke",R.drawable.triangle_stroke,8));
+        shapes.add(new Shape("Circle Solid",R.drawable.circle_solid,3));
+        shapes.add(new Shape("Circle Stroke",R.drawable.circle_stroke,4));
+        shapes.add(new Shape("Triangle Solid",R.drawable.triangle_solid,5));
+        shapes.add(new Shape("Triangle Stroke",R.drawable.triangle_stroke,6));
 
 
         ShapeListAdapter shapesAdapter = new ShapeListAdapter(this,shapes);
@@ -83,6 +81,7 @@ public class DrawAndPaint extends AppCompatActivity {
         listview_shapes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
                 selectedShapeListItem = Shape.GetItemForAtPosition(position,shapes);
+                DrawingView.SetShape(selectedShapeListItem.getShapeName());
             }
         });
         listview_shapes.setAdapter(shapesAdapter);
@@ -91,13 +90,12 @@ public class DrawAndPaint extends AppCompatActivity {
 
     private void CreateDrawingView()
     {
-        drawingViewLayout = findViewById(R.id.drawingView);
-        dv = new DrawingView(context, drawingViewLayout, Integer.parseInt(selectedColor));
+        drawingViewLayout = findViewById(R.id.drawingViewLayout);
+        dv = new DrawingView(context);
         dv.setVisibility(View.VISIBLE);
         dv.setId(R.id.drawingView);
         drawingViewLayout.addView(dv);
     }
-
 
     public void CreateClearButton()
     {
@@ -109,7 +107,7 @@ public class DrawAndPaint extends AppCompatActivity {
 
     private void clearAllDrawingView(View view) {
         drawingViewLayout.removeView(dv);
-        dv = new DrawingView(context, drawingViewLayout, Integer.parseInt(selectedColor));
+        dv = new DrawingView(context);
         dv.setVisibility(View.VISIBLE);
         dv.setId(R.id.drawingView);
         drawingViewLayout.addView(dv);

@@ -1,7 +1,9 @@
 package com.example._7920Assignment2;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
@@ -10,58 +12,142 @@ import android.view.View;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DrawingView extends View {
 
-    public static DrawingView dv;
-    private Canvas mCanvas;
-    private Path mPath;
     public static Context context;
-    public static ConstraintLayout drawingViewLayout;
     public static Paint mPaint;
-    public static int selectedColor;
-
+    public static String selectedShape="";
+    private Bitmap mBitmap;
+    private Path path = new Path();
+    List<Path> pathList = new ArrayList<Path>();
+    Canvas mCanvas;
 
     float mStartX;
     float mStartY;
     float mEndX;
     float mEndY;
+    float x;
+    float y;
+    float mX;
+    float mY;
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        // TODO Auto-generated method stub
+        super.onSizeChanged(w, h, oldw, oldh);
+
+
+        this.setDrawingCacheEnabled(true);
+        buildDrawingCache();
+        mBitmap = Bitmap.createBitmap(500,800, Bitmap.Config.ARGB_8888);
+        //canvasBitmap=BitmapFactory.decodeResource(getResources(),R.drawable.images);
+        mCanvas = new Canvas(mBitmap);
+
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mStartX = event.getX();
-                mStartY = event.getY();
-
-                break;
-            // return true;
-            case MotionEvent.ACTION_MOVE:
-
-                mEndX = event.getX();
-                mEndY = event.getY();
-
-                //mCanvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
-
-                invalidate(); // Tell View that the canvas needs to be redrawn
-                break;
-            case MotionEvent.ACTION_UP:
-                mEndX = event.getX();
-                mEndY = event.getY();
-                break;
-            default:
-                return false;
+        if(selectedShape.equals("Line")) {
+            if (event.getHistorySize() == 0) {
+                x = event.getX();
+                y = event.getY();
+            }
+            if (x == 0 && y == 0) {
+                x = event.getX();
+                y = event.getY();
+            }
+            mX=event.getX();
+            mY=event.getY();
+            path = new Path();
+            Path path = new Path();
+            path.moveTo(x,y);
+            path.moveTo(mX,mY);
+            path.lineTo(x,y);
+            path.lineTo(mX,mY);
+            pathList.add(path);
+            path = new Path();
+            return true;
         }
-        return true;
+        else {
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mStartX = event.getX();
+                    mStartY = event.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mEndX = event.getX();
+                    mEndY = event.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mEndX = event.getX();
+                    mEndY = event.getY();
+                    path = new Path();
+                    path.addRect(mStartX, mStartY, mEndX, mEndY,Path.Direction.CW);
+                    pathList.add(path);
+                    path = new Path();
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
     }
+
+    public Bitmap getBitmap()
+    {
+        //this.measure(100, 100);
+        //this.layout(0, 0, 100, 100);
+        this.setDrawingCacheEnabled(true);
+        this.buildDrawingCache();
+        Bitmap bmp = Bitmap.createBitmap(this.getDrawingCache());
+        this.setDrawingCacheEnabled(false);
+
+
+        return bmp;
+    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
 
         super.onDraw(canvas);
-
-        canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
+        if(mBitmap!=null) {
+            for(Path path :pathList)
+            canvas.drawPath(path, mPaint);
+            canvas.drawBitmap(mBitmap, 0, 0, null);
+        }
+  /*      if(selectedShape.equals("Rectangle Solid"))
+            canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
+        else if(selectedShape.equals("Rectangle Stroke"))
+            canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
+        else if(selectedShape.equals("Cicle Solid"))
+            canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
+        else if(selectedShape.equals("Cicle Stroke"))
+            canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
+        else if(selectedShape.equals("Triangle Solid"))
+            canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
+        else if(selectedShape.equals("Triangle Stroke"))
+            canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);
+        else if(selectedShape.equals("Line"))
+            canvas.drawLine(x, y, mX, mY, mPaint);
+        else
+            canvas.drawRect(mStartX, mStartY, mEndX, mEndY, mPaint);*/
         invalidate();
+    }
+
+    public static void SetShape (String selectedShapeString)
+    {
+        selectedShape = selectedShapeString;
+    }
+
+    public static void SetPaintColor(int selectedColor)
+    {
+        mPaint.setColor(selectedColor);
     }
 
     public static Paint GetPaintObject()
@@ -69,23 +155,17 @@ public class DrawingView extends View {
         return mPaint;
     }
 
-    public DrawingView(Context c, ConstraintLayout layout, int color) {
+    public DrawingView(Context c) {
         //add drawing view to the screen
         super(c);
         context = c;
-        selectedColor = color;
+        path=new Path();
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
-        mPaint.setColor(selectedColor);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(12);
-    }
-
-    public static void Clear(View v) {
-        drawingViewLayout.removeView(dv);
-        DrawingView dv = new DrawingView(context,drawingViewLayout,selectedColor);
     }
 }
