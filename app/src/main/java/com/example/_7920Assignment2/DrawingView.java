@@ -10,6 +10,9 @@ import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.RequiresApi;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,6 +173,41 @@ public class DrawingView extends View {
             canvas.drawBitmap(mBitmap, 0, 0, null);
         }
         invalidate();
+    }
+
+    // undo drawing steps
+    public void UndoDrawing() {
+        if(pathList!=null && pathList.size()>0) {
+            mBitmap = Bitmap.createBitmap(500, 800, Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mBitmap);
+            pathList.remove(pathList.size() - 1);
+            if (mBitmap != null) {
+                for (PathTracker pathTracker : pathList) {
+                    if (pathTracker.getIsFill())
+                        mPaint.setStyle(Paint.Style.FILL);
+                    else
+                        mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setColor(pathTracker.getSelectedColor());
+                    mCanvas.drawPath(pathTracker.getPathOfObject(), mPaint);
+                }
+                mCanvas.drawBitmap(mBitmap, 0, 0, null);
+            }
+            invalidate();
+        }
+    }
+
+    public void saveDrawing() {
+        this.setDrawingCacheEnabled(true);
+        Bitmap bitmap = this.getDrawingCache();
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream("MyDrawing.jpg");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        bitmap.compress(Bitmap.CompressFormat.PNG, 95, fos);
     }
 
     //get trisangle radii

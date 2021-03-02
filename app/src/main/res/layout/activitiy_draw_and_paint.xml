@@ -73,9 +73,7 @@
             android:layout_height="75dp"
             android:layout_gravity="start"
             android:layout_marginLeft="0.10in"
-            android:background="@drawable/undo"
-            android:clickable="true"
-            android:onClick="undoDrawing" />
+            android:background="@drawable/undo" />
 
         <ImageButton
             android:id="@+id/btnClearAll"
@@ -83,9 +81,7 @@
             android:layout_height="75dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginLeft="1.10in"
-            android:background="@drawable/reset"
-            android:clickable="true"
-            android:onClick="clearAllDrawingView" />
+            android:background="@drawable/reset" />
 
         <ImageButton
             android:id="@+id/btnSave"
@@ -93,9 +89,7 @@
             android:layout_height="75dp"
             android:layout_gravity="end"
             android:layout_marginLeft="1.10in"
-            android:background="@drawable/save"
-            android:clickable="true"
-            android:onClick="saveDrawing" />
+            android:background="@drawable/save" />
 
     </LinearLayout>
 </LinearLayout>

@@ -2,6 +2,7 @@ package com.example._7920Assignment2;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -48,6 +50,8 @@ public class DrawAndPaint extends AppCompatActivity {
         //add drawing view to the screen
         CreateDrawingView();
 
+        //setup image button for drawing options
+        SetUpImageButtons();
     }
 
     //add  color palette  to screen
@@ -99,19 +103,36 @@ public class DrawAndPaint extends AppCompatActivity {
         drawingViewLayout.addView(dv);
     }
 
-    //clear Drawing View
-    private void clearAllDrawingView(View view) {
+    //setup options for drawing - Undo, save ,clearAll
+    private void SetUpImageButtons() {
+        ImageButton saveButton = (ImageButton) findViewById(R.id.btnSave);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                 dv.saveDrawing();
+            }
+        });
 
-    }
+        ImageButton undoButton = (ImageButton) findViewById(R.id.btnUndo);
+        undoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dv.UndoDrawing();
+            }
+        });
 
-    //undo Drawing View
-    private void undoDrawing(View view) {
-
-    }
-
-    //save Drawing View
-    private void saveDrawing(View view) {
-
+        ImageButton resetButton = (ImageButton) findViewById(R.id.btnClearAll);
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                Intent intent = getIntent();
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
+        });
     }
 
     //shape list adapter to bind listview containing all shapes
