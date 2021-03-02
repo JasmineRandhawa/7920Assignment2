@@ -48,9 +48,6 @@ public class DrawAndPaint extends AppCompatActivity {
         //add drawing view to the screen
         CreateDrawingView();
 
-        // adding clear button
-        CreateClearButton();
-
     }
 
     //add  color palette  to screen
@@ -102,22 +99,19 @@ public class DrawAndPaint extends AppCompatActivity {
         drawingViewLayout.addView(dv);
     }
 
-    //add  clear button
-    public void CreateClearButton()
-    {
-        TextView textView = (TextView) findViewById(R.id.btnClearAll);
-        SpannableString content = new SpannableString("Clear All");
-        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        textView.setText(content);
-    }
-
     //clear Drawing View
     private void clearAllDrawingView(View view) {
-        drawingViewLayout.removeView(dv);
-        dv = new DrawingView(context);
-        dv.setVisibility(View.VISIBLE);
-        dv.setId(R.id.drawingView);
-        drawingViewLayout.addView(dv);
+
+    }
+
+    //undo Drawing View
+    private void undoDrawing(View view) {
+
+    }
+
+    //save Drawing View
+    private void saveDrawing(View view) {
+
     }
 
     //shape list adapter to bind listview containing all shapes

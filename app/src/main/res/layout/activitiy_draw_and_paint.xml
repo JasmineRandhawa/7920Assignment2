@@ -2,15 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@android:color/white"
     android:orientation="vertical">
-
 
     <GridView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/colorGrid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="0.05in"
         android:layout_marginBottom="0.05in"
         android:columnWidth="40px"
         android:gravity="center"
@@ -23,6 +22,12 @@
 
     </GridView>
 
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:background="@android:color/black"
+        android:layout_height="5dp">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <LinearLayout
         android:id="@+id/shapesLayout"
         android:layout_width="match_parent"
@@ -34,33 +39,63 @@
             android:id="@+id/listview_shapes"
             android:choiceMode="singleChoice"
             android:listSelector="@android:color/holo_blue_light"
-            android:layout_width="100dp"
-            android:layout_height="800dp"
+            android:layout_width="90dp"
+            android:layout_height="673dp"
             android:paddingBottom="10dp" />
 
+        <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="5dp"
+            android:background="@android:color/black"
+            android:layout_height="673dp">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/drawingViewLayout"
             android:layout_width="match_parent"
             android:background="@android:color/white"
-            android:layout_height="800dp">
+            android:layout_height="673dp">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 
-
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/optionsLayout"
+        android:layout_width="match_parent"
+        android:background="@android:color/holo_blue_light"
+        android:orientation="horizontal"
         android:layout_height="wrap_content"
-        android:id="@+id/btnClearAll"
-        android:layout_marginTop="0.05in"
-        android:textSize="40dp"
-        android:layout_gravity="end"
-        android:text="Clear All"
-        android:textColor="@android:color/black"
-        android:clickable="true"
-        android:textStyle="bold"
-        android:onClick="clearAllDrawingView">
+        android:padding="0.05in">
 
-    </TextView>
+        <ImageButton
+            android:id="@+id/btnUndo"
+            android:layout_width="70dp"
+            android:layout_height="75dp"
+            android:layout_gravity="start"
+            android:layout_marginLeft="0.10in"
+            android:background="@drawable/undo"
+            android:clickable="true"
+            android:onClick="undoDrawing" />
+
+        <ImageButton
+            android:id="@+id/btnClearAll"
+            android:layout_width="70dp"
+            android:layout_height="75dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="1.10in"
+            android:background="@drawable/reset"
+            android:clickable="true"
+            android:onClick="clearAllDrawingView" />
+
+        <ImageButton
+            android:id="@+id/btnSave"
+            android:layout_width="70dp"
+            android:layout_height="75dp"
+            android:layout_gravity="end"
+            android:layout_marginLeft="1.10in"
+            android:background="@drawable/save"
+            android:clickable="true"
+            android:onClick="saveDrawing" />
+
+    </LinearLayout>
 </LinearLayout>

@@ -102,13 +102,19 @@ public class DrawingView extends View {
         //handle all other shapes other than line
         else  {
             boolean isFill = false;
-            boolean isCircle = false;
+            boolean isOval = false;
+            boolean isTriangle = false;
+            boolean isRectangle = false;
             if (selectedShape.equals(Shape.RectangleSolid)||
                     selectedShape.equals(Shape.OvalSolid) ||
                     selectedShape.equals(Shape.TriangleSolid))
                 isFill = true;
             if (selectedShape.equals(Shape.OvalSolid)|| selectedShape.equals(Shape.OvalStroke))
-                isCircle = true;
+                isOval = true;
+            if (selectedShape.equals(Shape.RectangleSolid)|| selectedShape.equals(Shape.RectangleStroke))
+                isRectangle = true;
+            if (selectedShape.equals(Shape.TriangleSolid)|| selectedShape.equals(Shape.TriangleStroke))
+                isTriangle = true;
 
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -123,10 +129,20 @@ public class DrawingView extends View {
                     mEndX = event.getX();
                     mEndY = event.getY();
                     path = new Path();
-                    if(!isCircle)
+                    if(isRectangle)
                         path.addRect(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
-                    else
+                    else if(isOval)
                         path.addOval(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
+                    else if(isTriangle)
+                    {
+                        int halfWidth =  (int) calculateRadius(mStartX,mStartY,mEndX,mEndY);
+                        path.reset();
+                        path.moveTo(mStartX,mStartY-halfWidth);
+                        path.lineTo(mStartX - halfWidth, mStartY + halfWidth); // Bottom left
+                        path.lineTo(mStartX + halfWidth, mStartY + halfWidth); // Bottom right
+                        path.lineTo(mStartX, mStartY-halfWidth); // Back to Top
+                        path.close();
+                    }
                     pathList.add(new PathTracker(path, mStartX, mStartY, mEndX, mEndY,
                             selectedShape, selectedColor, isFill));
                     path = new Path();
@@ -154,6 +170,15 @@ public class DrawingView extends View {
             canvas.drawBitmap(mBitmap, 0, 0, null);
         }
         invalidate();
+    }
+
+    //get trisangle radii
+    private float calculateRadius(float x1, float y1, float x2, float y2) {
+
+        return (float) Math.sqrt(
+                Math.pow(x1 - x2, 2) +
+                        Math.pow(y1 - y2, 2)
+        );
     }
 
 }
