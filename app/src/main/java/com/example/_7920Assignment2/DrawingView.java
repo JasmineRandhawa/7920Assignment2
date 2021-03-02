@@ -79,7 +79,6 @@ public class DrawingView extends View {
                     break;
             }
             return true;
-
         }
         else {
 
