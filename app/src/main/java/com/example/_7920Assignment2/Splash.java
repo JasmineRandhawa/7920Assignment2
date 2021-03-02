@@ -13,12 +13,13 @@ public class Splash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        int secondsDelayed = 1;
         new Handler().postDelayed(new Runnable() {
+
+            @Override
             public void run() {
                 startActivity(new Intent(Splash.this, DrawAndPaint.class));
-                finish();
+                Splash.this.finish();
             }
-        }, secondsDelayed * 1000);
+        }, 1000);
     }
 }
