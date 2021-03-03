@@ -6,15 +6,23 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.View;
-import androidx.annotation.RequiresApi;
+import android.widget.Toast;
 
-import java.io.FileNotFoundException;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /* Drawing view operations - draw , ontouch , color changes, shape changer */
 public class DrawingView extends View {
@@ -196,19 +204,46 @@ public class DrawingView extends View {
         }
     }
 
+    //save drawing
     public void saveDrawing() {
-        this.setDrawingCacheEnabled(true);
-        Bitmap bitmap = this.getDrawingCache();
+        String storagePath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        String targetDirPath = storagePath + "/Pictures/";
+        File targetDir = new File(targetDirPath);
+        if (!targetDir.exists()) {
+            if (false == targetDir.mkdirs()) {
 
+                return ;
+            }
+        }
+        if (targetDir.isDirectory()) {
+            String[] children = targetDir.list();
+            for (int i = 0; i < children.length; i++) {
+                new File(targetDir, children[i]).delete();
+            }
+        }
+        File file = new File(targetDirPath + UUID.randomUUID().toString() + ".jpg");
+        String filePath = targetDirPath + UUID.randomUUID().toString() + ".jpg";
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream("MyDrawing.jpg");
-        } catch (FileNotFoundException e) {
+            fos = new FileOutputStream(filePath);
+            this.getDrawingCache().compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            String imgSaved = MediaStore.Images.Media.insertImage(
+                    context.getContentResolver(), this.getDrawingCache(),
+                    null, "drawing");
+            Toast.makeText(context, "Drawing Saved", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            String s = e.getMessage();
+            Toast.makeText(context, "Error in saving", Toast.LENGTH_LONG).show();
             e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-
-        bitmap.compress(Bitmap.CompressFormat.PNG, 95, fos);
     }
+
 
     //get trisangle radii
     private float calculateRadius(float x1, float y1, float x2, float y2) {

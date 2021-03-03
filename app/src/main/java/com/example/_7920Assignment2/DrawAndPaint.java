@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
@@ -18,14 +21,19 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import java.io.File;
 import java.util.ArrayList;
 
 /* Draw and Paint Shapes
  Four chapes are used with unfill anf fill funtionality
  Shapes Used: Line, Rectangle/Square, Oval/Circle and Triangle */
 public class DrawAndPaint extends AppCompatActivity {
+    private static final int RESULT_LOAD_IMAGE =1 ;
     DrawingView dv;
     Context context;
     ConstraintLayout drawingViewLayout;
@@ -109,7 +117,12 @@ public class DrawAndPaint extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 dv.saveDrawing();
+                dv.saveDrawing();
+                Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
+                        +  File.separator + "Pictures" + File.separator);
+                Intent intent = new Intent(Intent.ACTION_PICK,uri);
+                intent.setType("image/*");
+                startActivity(intent);
             }
         });
 
@@ -134,6 +147,7 @@ public class DrawAndPaint extends AppCompatActivity {
             }
         });
     }
+
 
     //shape list adapter to bind listview containing all shapes
     public class ShapeListAdapter extends ArrayAdapter<Shape> {
