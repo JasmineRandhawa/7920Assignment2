@@ -3,6 +3,7 @@ package com.example._7920Assignment2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -27,18 +28,19 @@ import java.util.UUID;
 /* Drawing view operations - draw , ontouch , color changes, shape changer */
 public class DrawingView extends View {
 
-    public static Context context;
-    public static Paint mPaint;
-    public static String selectedShape="";
+    private Context context;
+    private static Paint mPaint;
+    private static String selectedShape;
     private Bitmap mBitmap;
-    public static int selectedColor;
+    private static int selectedColor;
     private Path path;
-    List<PathTracker> pathList = new ArrayList<PathTracker>();
+    List<PathTracker> pathList;
     Canvas mCanvas;
     float mStartX;
     float mStartY;
     float mEndX;
     float mEndY;
+    private Path mPath ;
     private PointF startPoint, endPoint;
 
     //constructor
@@ -46,7 +48,17 @@ public class DrawingView extends View {
         //add drawing view to the screen
         super(c);
         context = c;
+        selectedShape ="";
+        selectedColor= Color.MAGENTA;
+        pathList = new ArrayList<PathTracker>();
+        startPoint = new PointF();
+        endPoint = new PointF();
+        mStartX = 0f;
+        mStartY = 0f;
+        mEndX = 0f;
+        mEndY = 0f;
         path=new Path();
+        mPath=new Path();
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
@@ -75,16 +87,55 @@ public class DrawingView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         this.setDrawingCacheEnabled(true);
-        buildDrawingCache();
         mBitmap = Bitmap.createBitmap(500, 800, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
     }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        if(mBitmap!=null) {
+            for (PathTracker pathTracker : pathList) {
+                if (pathTracker.getIsFill())
+                    mPaint.setStyle(Paint.Style.FILL);
+                else
+                    mPaint.setStyle(Paint.Style.STROKE);
+                mPaint.setColor(pathTracker.getSelectedColor());
+                canvas.drawPath(pathTracker.getPathOfObject(), mPaint);
+            }
+            canvas.drawBitmap(mBitmap, 0, 0, null);
+        }
+        invalidate();
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //handle all line case other than line
-        if(selectedShape.equals(Shape.Line)) {
+        if(selectedShape.equals("")) {
+            float x = event.getX();
+            float y = event.getY();
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    touch_start(x, y);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    touch_move(x, y);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    touch_up();
+                    pathList.add(new PathTracker(mPath, mStartX, mStartY, mEndX, mEndY,
+                            selectedShape, selectedColor, false));
+                    mPath = new Path();
+                    break;
+            }
+
+            return true;
+        }
+        else if(selectedShape.equals(Shape.Line)) {
             path = new Path();
             switch (event.getAction())
             {
@@ -165,24 +216,6 @@ public class DrawingView extends View {
         }
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-
-        super.onDraw(canvas);
-        if(mBitmap!=null) {
-            for (PathTracker pathTracker : pathList) {
-                if (pathTracker.getIsFill())
-                    mPaint.setStyle(Paint.Style.FILL);
-                else
-                    mPaint.setStyle(Paint.Style.STROKE);
-                mPaint.setColor(pathTracker.getSelectedColor());
-                canvas.drawPath(pathTracker.getPathOfObject(), mPaint);
-            }
-            canvas.drawBitmap(mBitmap, 0, 0, null);
-        }
-        invalidate();
-    }
-
     // undo drawing steps
     public void UndoDrawing() {
         if(pathList!=null && pathList.size()>0) {
@@ -202,6 +235,31 @@ public class DrawingView extends View {
             }
             invalidate();
         }
+    }
+
+    private float mX, mY;
+    private static final float TOUCH_TOLERANCE = 4;
+
+    private void touch_start(float x, float y) {
+        mPath.moveTo(x, y);
+        mX = x;
+        mY = y;
+    }
+
+    private void touch_move(float x, float y) {
+        float dx = Math.abs(x - mX);
+        float dy = Math.abs(y - mY);
+        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+            mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+            mX = x;
+            mY = y;
+
+        }
+    }
+
+    private void touch_up() {
+        mPath.lineTo(mX, mY);
+        pathList.add(new PathTracker(mPath, mStartX,mStartX,mStartX,mStartX,selectedShape, selectedColor, false));
     }
 
     //save drawing
@@ -248,10 +306,20 @@ public class DrawingView extends View {
     //get trisangle radii
     private float calculateRadius(float x1, float y1, float x2, float y2) {
 
-        return (float) Math.sqrt(
+        return ((float) Math.sqrt(
                 Math.pow(x1 - x2, 2) +
-                        Math.pow(y1 - y2, 2)
+                        Math.pow(y1 - y2, 2))/2
         );
     }
 
+    public List<PointF>  RemoveDuplicates(List<PointF> points)
+    {
+        List<PointF> finalPoints = new  ArrayList<PointF>();
+        for (PointF p : points)
+        {
+            if(!finalPoints.contains(p))
+                finalPoints.add(p);
+        }
+        return finalPoints;
+    }
 }

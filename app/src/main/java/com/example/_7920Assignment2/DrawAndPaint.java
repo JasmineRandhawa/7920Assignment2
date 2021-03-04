@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -69,6 +70,7 @@ public class DrawAndPaint extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 selectedColor = parent.getItemAtPosition(position).toString();
+                view.setSelected(true);
                 DrawingView.SetPaintColor(Integer.parseInt(selectedColor));
             }
         });
@@ -91,6 +93,8 @@ public class DrawAndPaint extends AppCompatActivity {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
                 selectedShapeListItem = Shape.GetItemForAtPosition(position,shapes);
                 DrawingView.SetShape(selectedShapeListItem.getShapeName());
+                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutFreehand);
+                freeHandImage.setBackgroundColor(Color.WHITE);
             }
         });
         listview_shapes.setAdapter(shapesAdapter);
@@ -134,6 +138,7 @@ public class DrawAndPaint extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                DrawingView.SetPaintColor(Integer.parseInt(Color.MAGENTA+""));
                 finish();
                 Intent intent = getIntent();
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -142,6 +147,22 @@ public class DrawAndPaint extends AppCompatActivity {
                 overridePendingTransition(0, 0);
             }
         });
+
+
+        ImageButton freeHand = (ImageButton) findViewById(R.id.btnFreehand);
+        freeHand.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListView shapeListView = (ListView) findViewById(R.id.listview_shapes);
+                CreateShapesView();
+                DrawingView.SetShape("");
+                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutFreehand);
+                freeHandImage.setBackgroundColor(Color.BLUE);
+            }
+        });
+
+        LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutFreehand);
+        freeHandImage.setBackgroundColor(Color.BLUE);
     }
 
 
