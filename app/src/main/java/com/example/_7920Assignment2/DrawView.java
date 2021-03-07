@@ -109,27 +109,36 @@ public class DrawView extends View {
             if(pdList!=null && pdList.size()>0) {
 
                 for (PathData pd :pdList) {
-                        List<PathPoint> finalPoints = new ArrayList<PathPoint>();
-                        finalPoints.addAll(pd.pathPointList);
-                        int selectecColor = pd.SelectedColor;
+                    int selectecColor = pd.SelectedColor;
+
+                    mPaint.setColor(selectecColor);
+                    if(pd.Path!=null) {
                         if (pd.IsFill)
                             mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                         else
                             mPaint.setStyle(Paint.Style.STROKE);
+                        List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                        finalPoints.addAll(pd.pathPointList);
                         mPaint.setColor(selectecColor);
                         canvas.drawPath(pd.Path, mPaint);
+                    }
                 }
             }
+            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setColor(selectedColor);
+            canvas.drawPath(mPath, mPaint);
         canvas.drawBitmap(mBitmap, 0, 0, null);
     }
 
     }
+
 
     //show alert when shape not selected
     public void ShowAlert(String message)
     {
        Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
     }
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -146,25 +155,39 @@ public class DrawView extends View {
         }
         if (drawingMode.equals(Shape.FreeHandDrawingMode) &&
                 (selectedShape.equals(Shape.TriangleStroke) || selectedShape.equals(Shape.TriangleSolid))) {
-            int x = (int) event.getX();
-            int y = (int) event.getY();
+
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     startPoint = new Point((int) event.getX(), (int) event.getY());
                     endPoint = new Point();
+                    mPath.moveTo(startPoint.x, startPoint.y);
+                    invalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    endPoint.x = (int) event.getX();
+
+                    float dx = Math.abs(startPoint.x - endPoint.x);
+                    float dy = Math.abs(startPoint.y - endPoint.y);
+                    mPaint.setColor(selectedColor);
+                    if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE)
+                    {
+                        endPoint.x = (int) event.getX();
                     endPoint.y = (int) event.getY();
+                    mPath.lineTo(endPoint.x, endPoint.y);
+                    }
+
                     pathList.add(new TrianglePathTracker(startPoint.x, startPoint.y, endPoint.x, endPoint.y));
                     startPoint = new Point((int)event.getX(),(int) event.getY());
+                    invalidate();
                     break;
                 case MotionEvent.ACTION_UP:
                     endPoint.x = (int) event.getX();
                     endPoint.y = (int) event.getY();
+                    //mPath.lineTo(endPoint.x,endPoint.y);
                     pathList.add(new TrianglePathTracker(startPoint.x, startPoint.y, endPoint.x, endPoint.y));
-                    UpdateList();
+                    UpdateList(mPath);
+
                     invalidate();
+                    mPath = new Path();
                     break;
                 default:
                     return false;
@@ -196,7 +219,7 @@ public class DrawView extends View {
                     List<PathPoint> finalPoints = new ArrayList<PathPoint>();
                     finalPoints.add(new PathPoint(mStartX, mStartY));
                     finalPoints.add(new PathPoint(mEndX, mEndY));
-                    pdList.add(new PathData(mPath, finalPoints, selectedColor, isFill));
+                    pdList.add(new PathData(mPath,null, finalPoints, selectedColor, isFill));
                     invalidate();
                     break;
                 default:
@@ -243,7 +266,7 @@ public class DrawView extends View {
                     List<PathPoint> finalPoints = new ArrayList<PathPoint>();
                     finalPoints.add(new PathPoint(mStartX, mStartY));
                     finalPoints.add(new PathPoint(mEndX, mEndY));
-                    pdList.add(new PathData(mPath, finalPoints, selectedColor, isFill));
+                    pdList.add(new PathData(mPath, null,finalPoints, selectedColor, isFill));
                     invalidate();
                     break;
                 default:
@@ -260,7 +283,7 @@ public class DrawView extends View {
         mX = x;
         mY = y;
         mPath.moveTo(x, y);
-
+        invalidate();
     }
 
     private void circle_touch_move(int x, int y) {
@@ -272,22 +295,24 @@ public class DrawView extends View {
             mY = y;
             mEndY = x;
             mEndY = y;
+            invalidate();
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void circle_touch_up() {
+
         PathPoint pathMidpoint = calculatePathMidPoint(mPath);
-        mPath = new Path();
         PathPoint circleCenterPoint = calculateCircleCenter(mStartX, pathMidpoint.getX(), mStartY, pathMidpoint.getY());
         float distanceBetweenTwoPoints = distanceBetweenTwoPoints(mStartX, circleCenterPoint.getX(), mStartY, circleCenterPoint.getY());
         int radius = (int) distanceBetweenTwoPoints;
-        Path mPath = new Path();
-        mPath.addCircle(circleCenterPoint.getX(), circleCenterPoint.getY(), radius, Path.Direction.CW);
+        Path path = new Path();
+        path.addCircle(circleCenterPoint.getX(), circleCenterPoint.getY(), radius, Path.Direction.CW);
         List<PathPoint> finalPoints = new ArrayList<PathPoint>();
         finalPoints.add(new PathPoint(mStartX, mStartY));
         finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
-        pdList.add(new PathData(mPath, finalPoints, selectedColor, isFill));
+        pdList.add(new PathData(path,mPath, finalPoints, selectedColor, isFill));
+        mPath= new Path();
     }
 
     public float distanceBetweenTwoPoints(float x1, float x2, float y1, float y2) {
@@ -308,19 +333,41 @@ public class DrawView extends View {
         return new PathPoint(aCoordinates[0], aCoordinates[1]);
     }
 
+    private List<PathPoint> getPoints(Path path) {
+        List<PathPoint> pointList = new ArrayList<>();
+        PathMeasure pm = new PathMeasure(path, false);
+        float length = pm.getLength();
+        float distance = 0f;
+        float speed = length / 70;
+        int counter = 0;
+        float[] aCoordinates = new float[2];
+
+        while ((distance < length) && (counter < 70)) {
+            // get point from the path
+            pm.getPosTan(distance, aCoordinates, null);
+            pointList.add(new PathPoint(aCoordinates[0],
+                    aCoordinates[1]));
+            counter++;
+            distance = distance + speed;
+        }
+
+        return pointList;
+    }
+
     // update Path data List
-    public void UpdateList() {
+    public void UpdateList(Path path) {
         List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+        pointList.addAll(getPoints(path));
         if (pathList != null && pathList.size() > 0) {
             pointList = new ArrayList<PathPoint>();
-            for (int i = 0; i <= pathList.size() - 1; i++) {
+            /*for (int i = 0; i <= pathList.size() - 1; i++) {
                 if (i <= pathList.size() - 1)
                     pointList.add(new PathPoint(pathList.get(i).StartX, pathList.get(i).StartY));
                 if (i == pathList.size() - 1)
                     pointList.add(new PathPoint(pathList.get(i).EndX, pathList.get(i).EndY));
-            }
+            }*/
 
-
+            pointList.addAll(getPoints(path));
             if (pointList != null && pointList.size() > 0) {
                 pointList = RemoveDuplicates(pointList);
 
@@ -359,7 +406,7 @@ public class DrawView extends View {
                 p.lineTo(finalPoints.get(i).x, finalPoints.get(i).y);
             }
             p.lineTo(finalPoints.get(0).x, finalPoints.get(0).y);
-            pdList.add(new PathData(p, finalPoints, selectedColor, isFill));
+            pdList.add(new PathData(p,null, finalPoints, selectedColor, isFill));
             pathList = new ArrayList<>();
         }
     }

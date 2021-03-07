@@ -8,10 +8,12 @@ public class PathData {
 
 
     Path Path ;
+    Path TempPath ;
     List<PathPoint> pathPointList ;
 
-    public PathData(Path path, List<PathPoint> pathPointList,  int selectedColor, boolean isFill) {
+    public PathData(Path path,Path tempPath ,List<PathPoint> pathPointList,  int selectedColor, boolean isFill) {
         this.Path = path;
+        this.TempPath = tempPath;
         this.pathPointList = pathPointList;
         SelectedColor = selectedColor;
         IsFill = isFill;
