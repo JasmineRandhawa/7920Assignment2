@@ -37,7 +37,7 @@ import java.util.ArrayList;
  Shapes Used: Line, Rectangle/Square, Oval/Circle and Triangle */
 public class DrawAndPaint extends AppCompatActivity {
     private static final int RESULT_LOAD_IMAGE =1 ;
-    DrawCircle drawingView;
+    DrawView drawingView;
     Context context;
     ConstraintLayout drawingViewLayout;
     String selectedColor = Color.GREEN + "";
@@ -109,7 +109,7 @@ public class DrawAndPaint extends AppCompatActivity {
     private void CreateDrawingView()
     {
         drawingViewLayout = findViewById(R.id.drawingViewLayout);
-        drawingView = new DrawCircle(context);
+        drawingView = new DrawView(context);
         drawingView.setVisibility(View.VISIBLE);
         drawingView.setId(R.id.drawingView);
         drawingViewLayout.addView(drawingView);

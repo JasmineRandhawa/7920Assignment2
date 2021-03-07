@@ -1,9 +1,6 @@
 package com.example._7920Assignment2;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,7 +13,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -29,30 +25,33 @@ import java.util.List;
 import java.util.UUID;
 
 /* Drawing triangle operations - draw , ontouch , color changes, shape changer */
-public class DrawTriangle extends View {
+public class DrawView extends View {
 
+    private final int TOUCH_TOLERANCE = 4;
     private List<TrianglePathTracker> pathList;
-    private  List<PathPoint> pointList;
+    private List<PathPoint> pointList;
     private Canvas mCanvas;
     private int mStartX;
-    private  int mStartY;
+    private int mStartY;
     private int mEndX;
     private int mEndY;
     private boolean isFill = false;
     private PathPoint nextPoint;
-    boolean isRightDirection = false;
-    boolean isTopDirection = false;
+    private boolean isRightDirection = false;
+    private boolean isTopDirection = false;
     private Context context;
     private Paint mPaint;
-    private String drawingMode ;
-    private String selectedShape ;
+    private String drawingMode;
+    private String selectedShape;
     private Bitmap mBitmap;
     private int selectedColor;
-    private List<PathData> pdList ;
+    private final List<PathData> pdList;
     private Point startPoint, endPoint;
+    private Path mPath;
+    private int mX, mY;
 
     //constructor
-    public DrawTriangle(Context c) {
+    public DrawView(Context c) {
         //add drawing view to the screen
         super(c);
         context = c;
@@ -63,6 +62,7 @@ public class DrawTriangle extends View {
         selectedShape = "";
         drawingMode = "";
         selectedColor = Color.MAGENTA;
+        mPath = new Path();
         pdList = new ArrayList<>();
         pointList = new ArrayList<>();
         pathList = new ArrayList<>();
@@ -83,9 +83,9 @@ public class DrawTriangle extends View {
     //set shape and fill-unfill
     public void SetShape(String shapeString) {
         selectedShape = shapeString;
-        if (selectedShape.equals(Shape.TriangleStroke))
+        if (selectedShape.equals(Shape.TriangleStroke) || selectedShape.equals(Shape.OvalStroke))
             isFill = false;
-        else if (selectedShape.equals(Shape.TriangleSolid))
+        else if (selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.OvalSolid))
             isFill = true;
     }
 
@@ -136,31 +136,32 @@ public class DrawTriangle extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if(drawingMode.equals("")) {
+        if (drawingMode.equals("")) {
             ShowAlert("Please select Drawing Mode ! ");
             return true;
         }
-        if(selectedShape.equals("")) {
+        if (selectedShape.equals("")) {
             ShowAlert("Please select Shape ! ");
             return true;
         }
-        if (drawingMode.equals(Shape.FreeHandDrawingMode)) {
+        if (drawingMode.equals(Shape.FreeHandDrawingMode) &&
+                (selectedShape.equals(Shape.TriangleStroke) || selectedShape.equals(Shape.TriangleSolid))) {
             int x = (int) event.getX();
             int y = (int) event.getY();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    startPoint = new Point((int)event.getX(),(int) event.getY());
+                    startPoint = new Point((int) event.getX(), (int) event.getY());
                     endPoint = new Point();
                     break;
                 case MotionEvent.ACTION_MOVE:
                     endPoint.x = (int) event.getX();
-                    endPoint.y = (int)event.getY();
+                    endPoint.y = (int) event.getY();
                     pathList.add(new TrianglePathTracker(startPoint.x, startPoint.y, endPoint.x, endPoint.y));
                     startPoint = new Point((int)event.getX(),(int) event.getY());
                     break;
                 case MotionEvent.ACTION_UP:
                     endPoint.x = (int) event.getX();
-                    endPoint.y = (int)event.getY();
+                    endPoint.y = (int) event.getY();
                     pathList.add(new TrianglePathTracker(startPoint.x, startPoint.y, endPoint.x, endPoint.y));
                     UpdateList();
                     invalidate();
@@ -170,7 +171,8 @@ public class DrawTriangle extends View {
             }
             return true;
 
-        } else if (drawingMode.equals(Shape.AutomaticDrawingmMode)) {
+        } else if (drawingMode.equals(Shape.AutomaticDrawingmMode) &&
+                (selectedShape.equals(Shape.TriangleStroke) || selectedShape.equals(Shape.TriangleSolid))) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();
@@ -192,9 +194,56 @@ public class DrawTriangle extends View {
                     mPath.lineTo(mStartX, mStartY - radius); // Back to Top
                     mPath.close();
                     List<PathPoint> finalPoints = new ArrayList<PathPoint>();
-                    finalPoints.add(new PathPoint(mStartX,mStartY));
-                    finalPoints.add(new PathPoint(mEndX,mEndY));
-                    pdList.add(new PathData(mPath,finalPoints, selectedColor,isFill));
+                    finalPoints.add(new PathPoint(mStartX, mStartY));
+                    finalPoints.add(new PathPoint(mEndX, mEndY));
+                    pdList.add(new PathData(mPath, finalPoints, selectedColor, isFill));
+                    invalidate();
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        } else if (drawingMode.equals(Shape.FreeHandDrawingMode) &&
+                ( selectedShape.equals(Shape.OvalSolid) || selectedShape.equals(Shape.OvalStroke))) {
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    circle_touch_start(x, y);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    circle_touch_move(x, y);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    circle_touch_up();
+                    invalidate();
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+
+        } else if (drawingMode.equals(Shape.AutomaticDrawingmMode) &&
+                (selectedShape.equals(Shape.OvalSolid) || selectedShape.equals(Shape.OvalStroke))) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mStartX = (int) event.getX();
+                    mStartY = (int) event.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mEndX = (int) event.getX();
+                    mEndY = (int) event.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mEndX = (int) event.getX();
+                    mEndY = (int) event.getY();
+                    Path mPath = new Path();
+                    mPath.addOval(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
+                    List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                    finalPoints.add(new PathPoint(mStartX, mStartY));
+                    finalPoints.add(new PathPoint(mEndX, mEndY));
+                    pdList.add(new PathData(mPath, finalPoints, selectedColor, isFill));
                     invalidate();
                     break;
                 default:
@@ -205,9 +254,62 @@ public class DrawTriangle extends View {
         return true;
     }
 
+    private void circle_touch_start(int x, int y) {
+        mStartX = x;
+        mStartY = y;
+        mX = x;
+        mY = y;
+        mPath.moveTo(x, y);
+
+    }
+
+    private void circle_touch_move(int x, int y) {
+        float dx = Math.abs(x - mX);
+        float dy = Math.abs(y - mY);
+        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+            mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            mX = x;
+            mY = y;
+            mEndY = x;
+            mEndY = y;
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void circle_touch_up() {
+        PathPoint pathMidpoint = calculatePathMidPoint(mPath);
+        mPath = new Path();
+        PathPoint circleCenterPoint = calculateCircleCenter(mStartX, pathMidpoint.getX(), mStartY, pathMidpoint.getY());
+        float distanceBetweenTwoPoints = distanceBetweenTwoPoints(mStartX, circleCenterPoint.getX(), mStartY, circleCenterPoint.getY());
+        int radius = (int) distanceBetweenTwoPoints;
+        Path mPath = new Path();
+        mPath.addCircle(circleCenterPoint.getX(), circleCenterPoint.getY(), radius, Path.Direction.CW);
+        List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+        finalPoints.add(new PathPoint(mStartX, mStartY));
+        finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
+        pdList.add(new PathData(mPath, finalPoints, selectedColor, isFill));
+    }
+
+    public float distanceBetweenTwoPoints(float x1, float x2, float y1, float y2) {
+        return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+    }
+
+    public PathPoint calculateCircleCenter(float x1, float x2, float y1, float y2) {
+        return new PathPoint((float) (x1 + x2) / 2, (float) (y1 + y2) / 2);
+    }
+
+    public PathPoint calculatePathMidPoint(Path path) {
+        PathMeasure pm = new PathMeasure(path, true);
+        //coordinates will be here
+        float[] aCoordinates = {0f, 0f};
+
+        //get coordinates of the middle point
+        pm.getPosTan(pm.getLength() * 0.5f, aCoordinates, null);
+        return new PathPoint(aCoordinates[0], aCoordinates[1]);
+    }
+
     // update Path data List
-    public void UpdateList()
-    {
+    public void UpdateList() {
         List<PathPoint> finalPoints = new ArrayList<PathPoint>();
         if (pathList != null && pathList.size() > 0) {
             pointList = new ArrayList<PathPoint>();
@@ -257,8 +359,8 @@ public class DrawTriangle extends View {
                 p.lineTo(finalPoints.get(i).x, finalPoints.get(i).y);
             }
             p.lineTo(finalPoints.get(0).x, finalPoints.get(0).y);
-            pdList.add(new PathData(p,finalPoints, selectedColor,isFill));
-            pathList = new ArrayList<TrianglePathTracker>();
+            pdList.add(new PathData(p, finalPoints, selectedColor, isFill));
+            pathList = new ArrayList<>();
         }
     }
 
