@@ -21,6 +21,34 @@
         android:visibility="visible">
 
     </GridView>
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:background="@android:color/black"
+        android:layout_height="5dp">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <RadioGroup
+        android:id="@+id/radioDrawingMode"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginLeft="0.5in"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioFreeHand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Free Hand"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/radioAutomatic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Automatic" />
+
+    </RadioGroup>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -37,26 +65,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="665dp"
+            android:layout_height="625dp"
             android:background="@android:color/white"
             android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/layoutFreehand"
-                android:layout_width="85dp"
-                android:layout_height="85dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginRight="1.5dp"
-                android:background="@android:color/white"
-                android:orientation="horizontal"
-                android:padding="10dp">
-
-                <ImageButton
-                    android:id="@+id/btnFreehand"
-                    android:layout_width="45dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/freehand" />
-            </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="88dp"
@@ -68,7 +79,7 @@
             <ListView
                 android:id="@+id/listview_shapes"
                 android:layout_width="85dp"
-                android:layout_height="615dp"
+                android:layout_height="625dp"
                 android:choiceMode="singleChoice"
                 android:listSelector="@color/Blue"
                 android:paddingBottom="10dp" />
@@ -77,21 +88,21 @@
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="5dp"
             android:background="@android:color/black"
-            android:layout_height="665dp">
+            android:layout_height="625dp">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/drawingViewLayout"
             android:layout_width="500.95dp"
-            android:background="@android:color/white"
-            android:layout_height="665dp">
+            android:layout_height="625dp"
+            android:background="@android:color/white">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="5dp"
-            android:layout_height="665dp"
+            android:layout_height="625dp"
             android:background="@android:color/black"></androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 

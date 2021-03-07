@@ -1,7 +1,10 @@
 package com.example._7920Assignment2;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -18,6 +21,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +37,7 @@ import java.util.ArrayList;
  Shapes Used: Line, Rectangle/Square, Oval/Circle and Triangle */
 public class DrawAndPaint extends AppCompatActivity {
     private static final int RESULT_LOAD_IMAGE =1 ;
-    DrawingView dv;
+    DrawCircle drawingView;
     Context context;
     ConstraintLayout drawingViewLayout;
     String selectedColor = Color.GREEN + "";
@@ -71,7 +77,7 @@ public class DrawAndPaint extends AppCompatActivity {
                                     int position, long id) {
                 selectedColor = parent.getItemAtPosition(position).toString();
                 view.setSelected(true);
-                DrawingView.SetPaintColor(Integer.parseInt(selectedColor));
+                drawingView.SetPaintColor(Integer.parseInt(selectedColor));
             }
         });
     }
@@ -92,9 +98,7 @@ public class DrawAndPaint extends AppCompatActivity {
         listview_shapes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
                 selectedShapeListItem = Shape.GetItemForAtPosition(position,shapes);
-                DrawingView.SetShape(selectedShapeListItem.getShapeName());
-                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutFreehand);
-                freeHandImage.setBackgroundColor(Color.WHITE);
+                drawingView.SetShape(selectedShapeListItem.getShapeName());
             }
         });
         listview_shapes.setAdapter(shapesAdapter);
@@ -105,10 +109,10 @@ public class DrawAndPaint extends AppCompatActivity {
     private void CreateDrawingView()
     {
         drawingViewLayout = findViewById(R.id.drawingViewLayout);
-        dv = new DrawingView(context);
-        dv.setVisibility(View.VISIBLE);
-        dv.setId(R.id.drawingView);
-        drawingViewLayout.addView(dv);
+        drawingView = new DrawCircle(context);
+        drawingView.setVisibility(View.VISIBLE);
+        drawingView.setId(R.id.drawingView);
+        drawingViewLayout.addView(drawingView);
     }
 
     //setup options for drawing - Undo, save ,clearAll
@@ -117,7 +121,7 @@ public class DrawAndPaint extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dv.saveDrawing();
+                drawingView.saveDrawing();
                 Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
                         +  File.separator + "Pictures" + File.separator);
                 Intent intent = new Intent(Intent.ACTION_PICK,uri);
@@ -130,7 +134,7 @@ public class DrawAndPaint extends AppCompatActivity {
         undoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dv.UndoDrawing();
+                drawingView.UndoDrawing();
             }
         });
 
@@ -138,7 +142,7 @@ public class DrawAndPaint extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DrawingView.SetPaintColor(Integer.parseInt(Color.MAGENTA+""));
+                drawingView.SetPaintColor(Integer.parseInt(Color.MAGENTA+""));
                 finish();
                 Intent intent = getIntent();
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -149,20 +153,19 @@ public class DrawAndPaint extends AppCompatActivity {
         });
 
 
-        ImageButton freeHand = (ImageButton) findViewById(R.id.btnFreehand);
-        freeHand.setOnClickListener(new View.OnClickListener() {
+        RadioGroup radioGroupDrawingMode = (RadioGroup) findViewById(R.id.radioDrawingMode);
+        radioGroupDrawingMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
             @Override
-            public void onClick(View v) {
-                ListView shapeListView = (ListView) findViewById(R.id.listview_shapes);
-                CreateShapesView();
-                DrawingView.SetShape("");
-                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutFreehand);
-                freeHandImage.setBackgroundColor(Color.BLUE);
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                int selectedId = radioGroupDrawingMode.getCheckedRadioButtonId();
+                RadioButton radioDrawingModeButton = (RadioButton) findViewById(selectedId);
+                String drawingMode = radioDrawingModeButton.getText().toString();
+                drawingView.SetDrawingMode(drawingMode);
             }
         });
-
-        LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutFreehand);
-        freeHandImage.setBackgroundColor(Color.BLUE);
+        ((RadioButton)radioGroupDrawingMode.getChildAt(0)).setChecked(true);
+        drawingView.SetDrawingMode(Shape.FreeHandDrawingMode);
     }
 
 
@@ -187,4 +190,6 @@ public class DrawAndPaint extends AppCompatActivity {
         }
 
     }
+
+
 }

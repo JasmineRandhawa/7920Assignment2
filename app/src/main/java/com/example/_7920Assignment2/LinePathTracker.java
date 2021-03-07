@@ -3,25 +3,28 @@ package com.example._7920Assignment2;
 import android.graphics.Path;
 
 /* Saves history of Object Paths drawn*/
-public class PathTracker {
+public class LinePathTracker {
+
     Path pathOfObject;
-    float StartX;
-    float StartY;
-    float EndX;
-    float EndY;
+    int StartX;
+    int StartY;
+    int EndX;
+    int EndY;
     String SelectedShape;
+    String Drawingmode;
     int SelectedColor;
     boolean IsFill;
 
     // Constructor of Path Tracker class
-    public PathTracker(Path pathOfObject, float startX, float startY, float endX, float endY,
-                       String selectedShape, int selectedColor, boolean isFill) {
+    public LinePathTracker(Path pathOfObject, int startX, int startY, int endX, int endY,
+                           String selectedShape, String drawingmode, int selectedColor, boolean isFill) {
         this.pathOfObject = pathOfObject;
         StartX = startX;
         StartY = startY;
         EndX = endX;
         EndY = endY;
         SelectedShape = selectedShape;
+        Drawingmode = drawingmode;
         SelectedColor = selectedColor;
         IsFill = isFill;
     }
@@ -31,7 +34,6 @@ public class PathTracker {
         return pathOfObject;
     }
 
-
     public int getSelectedColor() {
         return SelectedColor;
     }
@@ -39,5 +41,6 @@ public class PathTracker {
     public boolean getIsFill() {
         return IsFill;
     }
+
 
 }

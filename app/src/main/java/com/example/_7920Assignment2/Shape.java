@@ -15,6 +15,8 @@ public class Shape {
     public static String TriangleSolid = "Triangle Solid";
     public static String TriangleStroke = "Triangle Stroke";
     public static String Line = "Line";
+    public static String FreeHandDrawingMode = "Free Hand";
+    public static String AutomaticDrawingmMode = "Automatic";
 
     //constructor of shape class
     public Shape(String shapeName, long resourceId, long position) {
