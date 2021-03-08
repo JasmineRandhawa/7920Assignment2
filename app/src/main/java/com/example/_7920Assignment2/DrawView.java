@@ -80,7 +80,9 @@ public class DrawView extends View {
     //set shape and fill-unfill
     public void SetShape(String shapeString) {
         selectedShape = shapeString;
-        if (selectedShape.equals(Shape.TriangleStroke) || selectedShape.equals(Shape.CircleStroke))
+        if (selectedShape.equals(Shape.Line) ||
+            selectedShape.equals(Shape.TriangleStroke) ||
+            selectedShape.equals(Shape.CircleStroke))
             isFill = false;
         else if (selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.CircleSolid))
             isFill = true;
@@ -159,11 +161,15 @@ public class DrawView extends View {
                     mStartX = (int) event.getX();
                     mStartY = (int) event.getY();
                     mPath.moveTo(mStartX, mStartY);
+                    if (selectedShape.equals(Shape.Line))
+                        pointList.add(new PathPoint(x, y));
                     invalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
                     float dx = Math.abs(mStartX - mEndX);
                     float dy = Math.abs(mStartY - mEndY);
+                    if (selectedShape.equals(Shape.Line))
+                    pointList.add(new PathPoint(mStartX, mStartY));
                     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
                         if (selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke))
                             mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
@@ -176,6 +182,8 @@ public class DrawView extends View {
                     }
                     mStartX = x;
                     mStartY = y;
+                    if (selectedShape.equals(Shape.Line))
+                        pointList.add(new PathPoint(x, y));
                     invalidate();
                     break;
 
@@ -186,7 +194,7 @@ public class DrawView extends View {
                         pathList.add(new PathTracker(mStartX, mStartY, mEndX, mEndY));
                         UpdateList(mPath);
                     }
-                    else if ((selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke))) {
+                    else if (selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke)) {
                         PathPoint pathMidpoint = Utility.CalculatePathMidPoint(mPath);
                         PathPoint circleCenterPoint = Utility.CalculateCircleCenter(mStartX, pathMidpoint.getX(), mStartY, pathMidpoint.getY());
                         float radius = Utility.DistanceBetweenTwoPoints(mStartX, circleCenterPoint.getX(), mStartY, circleCenterPoint.getY());
@@ -196,6 +204,20 @@ public class DrawView extends View {
                         finalPoints.add(new PathPoint(mStartX, mStartY));
                         finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
                         pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
+                    }
+                    else if(selectedShape.equals(Shape.Line)) {
+                        List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                        if (pointList != null && pointList.size() > 0) {
+                            mPath = new Path();
+                            pointList = Utility.RemoveDuplicates(pointList);
+                            // find direction of triangle
+                            PathPoint startPoint = new PathPoint(pointList.get(0).x, pointList.get(0).y);
+                            PathPoint endPoint = new PathPoint(pointList.get(pointList.size()-1).x, pointList.get(pointList.size()-1).y);
+                            mPath.moveTo(startPoint.x, startPoint.y);
+                            mPath.lineTo(endPoint.x, endPoint.y);
+                        }
+                        pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
+                        pointList = new ArrayList<>();
                     }
                     mPath = new Path();
                     invalidate();
@@ -220,7 +242,7 @@ public class DrawView extends View {
                     mEndX = (int) event.getX();
                     mEndY = (int) event.getY();
                     Path mPath = new Path();
-                    if ((selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.TriangleStroke))) {
+                    if (selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.TriangleStroke)) {
                         int radius = (int) Utility.CalculateRadius(mStartX, mStartY, mEndX, mEndY);
                         mPath.reset();
                         mPath.moveTo(mStartX, mStartY - radius);
@@ -229,8 +251,12 @@ public class DrawView extends View {
                         mPath.lineTo(mStartX, mStartY - radius);
                         mPath.close();
                     }
-                    else if ((selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke)))
+                    else if (selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke))
                         mPath.addOval(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
+                    else if (selectedShape.equals(Shape.Line)) {
+                        mPath.moveTo(mStartX, mStartY);
+                        mPath.lineTo(mEndX, mEndY);
+                    }
                     List<PathPoint> finalPoints = new ArrayList<PathPoint>();
                     finalPoints.add(new PathPoint(mStartX, mStartY));
                     finalPoints.add(new PathPoint(mEndX, mEndY));
