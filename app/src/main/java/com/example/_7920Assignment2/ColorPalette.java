@@ -21,29 +21,23 @@ public class ColorPalette {
     public static ArrayList HSVColors() {
         ArrayList<Integer> colors = new ArrayList<>();
 
-        // Loop through hue channel, saturation and light full
         for (int h = 0; h <= 360; h += 20) {
             colors.add(HSVColor(h, 1, 1));
         }
 
-        // Loop through hue channel, different saturation and light full
         for (int h = 0; h <= 360; h += 20) {
             colors.add(HSVColor(h, .25f, 1));
             colors.add(HSVColor(h, .5f, 1));
             colors.add(HSVColor(h, .75f, 1));
         }
-        // Loop through the light channel, no hue no saturation
-        // It will generate gray colors
         for (float b = 0; b <= 1; b += .10f) {
             colors.add(HSVColor(0, 0, b));
         }
-        // Loop through hue channel, saturation full and light different
         for (int h = 0; h <= 360; h += 20) {
             //colors.add(createColor(h, 1, .25f));
             colors.add(HSVColor(h, 1, .5f));
             colors.add(HSVColor(h, 1, .75f));
         }
-
 
         return colors;
     }
