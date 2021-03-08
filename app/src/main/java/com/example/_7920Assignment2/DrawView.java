@@ -56,8 +56,8 @@ public class DrawView extends View {
     public DrawView(Context cntxt) {
         super(cntxt);
         context = cntxt;
-        selectedShape = "";
-        drawingMode = "";
+        selectedShape = Shape.Custom;
+        drawingMode = Shape.FreeHandDrawingMode;
         selectedColor = Color.MAGENTA;
         mPath = new Path();
         pdList = new ArrayList<>();
@@ -82,7 +82,8 @@ public class DrawView extends View {
         selectedShape = shapeString;
         if (selectedShape.equals(Shape.Line) ||
             selectedShape.equals(Shape.TriangleStroke) ||
-            selectedShape.equals(Shape.CircleStroke))
+            selectedShape.equals(Shape.CircleStroke) ||
+            selectedShape.equals(Shape.Custom))
             isFill = false;
         else if (selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.CircleSolid))
             isFill = true;
@@ -145,15 +146,39 @@ public class DrawView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if (drawingMode.equals("")) {
-            ShowAlert("Please select Drawing Mode ! ");
+        if (selectedShape.equals("Custom"))
+        {
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mStartX = (int) event.getX();
+                    mStartY = (int) event.getY();
+                    mPath.moveTo(mStartX, mStartY);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    float dx = Math.abs(mStartX - mEndX);
+                    float dy = Math.abs(mStartY - mEndY);
+                    if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                        mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
+                    }
+                    mStartX = x;
+                    mStartY = y;
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                    finalPoints.addAll(Utility.GetPoints(mPath));
+                    pdList.add(new PathData(mPath, finalPoints, selectedColor, isFill));
+                    mPath = new Path();
+                    invalidate();
+                    break;
+                default:
+                    return false;
+            }
             return true;
         }
-        if (selectedShape.equals("")) {
-            ShowAlert("Please select Shape ! ");
-            return true;
-        }
-        if (drawingMode.equals(Shape.FreeHandDrawingMode)) {
+        else if (!selectedShape.equals("Custom") && drawingMode.equals(Shape.FreeHandDrawingMode)) {
             int x = (int) event.getX();
             int y = (int) event.getY();
             switch (event.getAction()) {
@@ -206,7 +231,6 @@ public class DrawView extends View {
                         pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
                     }
                     else if(selectedShape.equals(Shape.Line)) {
-                        List<PathPoint> finalPoints = new ArrayList<PathPoint>();
                         if (pointList != null && pointList.size() > 0) {
                             mPath = new Path();
                             pointList = Utility.RemoveDuplicates(pointList);
@@ -228,7 +252,7 @@ public class DrawView extends View {
             }
             return true;
 
-        } else if (drawingMode.equals(Shape.AutomaticDrawingmMode)) {
+        } else if (!selectedShape.equals("Custom") &&  drawingMode.equals(Shape.AutomaticDrawingmMode)) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();

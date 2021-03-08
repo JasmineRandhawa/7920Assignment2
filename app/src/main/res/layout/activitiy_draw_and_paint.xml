@@ -21,10 +21,11 @@
         android:visibility="visible">
 
     </GridView>
+
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:background="@android:color/black"
-        android:layout_height="5dp">
+        android:layout_height="5dp"
+        android:background="@android:color/black">
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -32,30 +33,33 @@
         android:id="@+id/radioDrawingMode"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginLeft="0.5in"
+        android:layout_marginLeft="0.7in"
         android:orientation="horizontal">
 
         <RadioButton
             android:id="@+id/radioFreeHand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Free Hand"
-            android:checked="true" />
+            android:checked="true"
+            android:textSize="22dp"
+            android:text="Free Hand" />
 
         <RadioButton
             android:id="@+id/radioAutomatic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="22dp"
             android:text="Automatic" />
 
     </RadioGroup>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:background="@android:color/black"
-        android:layout_height="5dp">
+        android:layout_height="5dp"
+        android:background="@android:color/black">
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <LinearLayout
         android:id="@+id/shapesLayout"
         android:layout_width="wrap_content"
@@ -65,12 +69,32 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="625dp"
+            android:layout_height="630dp"
             android:background="@android:color/white"
             android:orientation="vertical">
 
+
+            <LinearLayout
+                android:id="@+id/layoutPencil"
+                android:layout_width="85dp"
+                android:layout_height="65dp"
+                android:layout_marginRight="1.5dp"
+                android:background="@android:color/white"
+                android:orientation="horizontal"
+                android:paddingTop="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="10dp"
+                android:paddingLeft="20dp">
+
+                <ImageButton
+                    android:id="@+id/btnPencil"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/pencil" />
+            </LinearLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="88dp"
+                android:layout_width="85dp"
                 android:layout_height="2dp"
                 android:background="@color/LightGrey">
 
@@ -83,31 +107,34 @@
                 android:choiceMode="singleChoice"
                 android:listSelector="@color/Blue"
                 android:paddingBottom="10dp" />
+
+
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="5dp"
-            android:background="@android:color/black"
-            android:layout_height="625dp">
+            android:layout_height="635dp"
+            android:background="@android:color/black">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/drawingViewLayout"
             android:layout_width="500.95dp"
-            android:layout_height="625dp"
+            android:layout_height="635dp"
             android:background="@android:color/white">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="5dp"
-            android:layout_height="625dp"
+            android:layout_width="7dp"
+            android:layout_height="630dp"
             android:background="@android:color/black"></androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
         android:layout_height="5dp"
         android:background="@android:color/black">
 
@@ -116,31 +143,32 @@
     <LinearLayout
         android:id="@+id/optionsLayout"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:background="@android:color/holo_blue_light"
         android:orientation="horizontal"
-        android:layout_height="wrap_content"
+
         android:padding="0.05in">
 
         <ImageButton
             android:id="@+id/btnUndo"
-            android:layout_width="70dp"
-            android:layout_height="75dp"
+            android:layout_width="60dp"
+            android:layout_height="65dp"
             android:layout_gravity="start"
             android:layout_marginLeft="0.10in"
             android:background="@drawable/undo" />
 
         <ImageButton
             android:id="@+id/btnClearAll"
-            android:layout_width="70dp"
-            android:layout_height="75dp"
+            android:layout_width="60dp"
+            android:layout_height="65dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginLeft="1.10in"
             android:background="@drawable/reset" />
 
         <ImageButton
             android:id="@+id/btnSave"
-            android:layout_width="70dp"
-            android:layout_height="75dp"
+            android:layout_width="60dp"
+            android:layout_height="65dp"
             android:layout_gravity="end"
             android:layout_marginLeft="1.10in"
             android:background="@drawable/save" />

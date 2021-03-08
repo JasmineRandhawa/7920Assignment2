@@ -1,12 +1,10 @@
 package com.example._7920Assignment2;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,12 +21,12 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -79,6 +77,7 @@ public class DrawAndPaint extends AppCompatActivity {
                                     int position, long id) {
                 selectedColor = parent.getItemAtPosition(position).toString();
                 view.setSelected(true);
+                view.setBackground(ContextCompat.getDrawable(context, R.drawable.border));
                 drawingView.SetPaintColor(Integer.parseInt(selectedColor));
             }
         });
@@ -90,8 +89,8 @@ public class DrawAndPaint extends AppCompatActivity {
         shapes.add(new Shape(Shape.Line,R.drawable.line,0));
         shapes.add(new Shape(Shape.RectangleSolid,R.drawable.rectangle_solid,1));
         shapes.add(new Shape(Shape.RectangleStroke,R.drawable.rectangle_stroke,2));
-        shapes.add(new Shape(Shape.CircleSolid,R.drawable.oval_solid,3));
-        shapes.add(new Shape(Shape.CircleStroke,R.drawable.oval_stroke,4));
+        shapes.add(new Shape(Shape.CircleSolid,R.drawable.circle_solid,3));
+        shapes.add(new Shape(Shape.CircleStroke,R.drawable.circle_stroke,4));
         shapes.add(new Shape(Shape.TriangleSolid,R.drawable.triangle_solid,5));
         shapes.add(new Shape(Shape.TriangleStroke,R.drawable.triangle_stroke,6));
 
@@ -101,6 +100,8 @@ public class DrawAndPaint extends AppCompatActivity {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
                 selectedShapeListItem = Shape.GetItemForAtPosition(position,shapes);
                 drawingView.SetShape(selectedShapeListItem.getShapeName());
+                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutPencil);
+                freeHandImage.setBackgroundColor(Color.WHITE);
             }
         });
         listview_shapes.setAdapter(shapesAdapter);
@@ -172,6 +173,20 @@ public class DrawAndPaint extends AppCompatActivity {
         });
         ((RadioButton)radioGroupDrawingMode.getChildAt(0)).setChecked(true);
         drawingView.SetDrawingMode(Shape.FreeHandDrawingMode);
+
+        ImageButton freeHand = (ImageButton) findViewById(R.id.btnPencil);
+        freeHand.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListView shapeListView = (ListView) findViewById(R.id.listview_shapes);
+                CreateShapesView();
+                drawingView.SetShape("Custom");
+                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutPencil);
+                freeHandImage.setBackgroundColor(Color.BLUE);
+            }
+        });
+        LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutPencil);
+        freeHandImage.setBackgroundColor(Color.BLUE);
     }
 
 

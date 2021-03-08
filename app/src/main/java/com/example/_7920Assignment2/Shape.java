@@ -15,6 +15,7 @@ public class Shape {
     public static String TriangleSolid = "Triangle Solid";
     public static String TriangleStroke = "Triangle Stroke";
     public static String Line = "Line";
+    public static String Custom = "Custom";
     public static String FreeHandDrawingMode = "Free Hand";
     public static String AutomaticDrawingmMode = "Automatic";
 
