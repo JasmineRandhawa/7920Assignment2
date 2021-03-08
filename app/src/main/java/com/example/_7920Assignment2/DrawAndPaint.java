@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -65,6 +66,8 @@ public class DrawAndPaint extends AppCompatActivity {
         SetUpImageButtons();
     }
 
+    View prevView = null;
+    int prevColor = -1;
     //add  color palette  to screen
     private void CreateColorPalette()
     {
@@ -77,8 +80,18 @@ public class DrawAndPaint extends AppCompatActivity {
                                     int position, long id) {
                 selectedColor = parent.getItemAtPosition(position).toString();
                 view.setSelected(true);
-                view.setBackground(ContextCompat.getDrawable(context, R.drawable.border));
+                if (prevView == null) {
+                    prevView =  view;
+                    prevColor = Integer.parseInt(selectedColor);
+                }
+                else
+                {
+                    prevView.setBackgroundColor(prevColor);
+                    prevView = null;
+                    prevColor = -1;
+                }
                 drawingView.SetPaintColor(Integer.parseInt(selectedColor));
+                view.setBackground(ContextCompat.getDrawable(context, R.drawable.list_selector));
             }
         });
     }
@@ -100,7 +113,7 @@ public class DrawAndPaint extends AppCompatActivity {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
                 selectedShapeListItem = Shape.GetItemForAtPosition(position,shapes);
                 drawingView.SetShape(selectedShapeListItem.getShapeName());
-                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutPencil);
+                LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
                 freeHandImage.setBackgroundColor(Color.WHITE);
             }
         });
@@ -174,8 +187,8 @@ public class DrawAndPaint extends AppCompatActivity {
         ((RadioButton)radioGroupDrawingMode.getChildAt(0)).setChecked(true);
         drawingView.SetDrawingMode(Shape.FreeHandDrawingMode);
 
-        ImageButton freeHand = (ImageButton) findViewById(R.id.btnPencil);
-        freeHand.setOnClickListener(new View.OnClickListener() {
+        ImageButton btnPencil =  findViewById(R.id.btnPencil);
+        btnPencil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ListView shapeListView = (ListView) findViewById(R.id.listview_shapes);

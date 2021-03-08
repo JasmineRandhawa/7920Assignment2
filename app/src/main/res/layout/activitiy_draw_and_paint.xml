@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
@@ -33,7 +34,7 @@
         android:id="@+id/radioDrawingMode"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginLeft="0.7in"
+        android:layout_marginLeft="0.9in"
         android:orientation="horizontal">
 
         <RadioButton
@@ -69,7 +70,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="630dp"
+            android:layout_height="635dp"
             android:background="@android:color/white"
             android:orientation="vertical">
 
@@ -90,7 +91,7 @@
                     android:id="@+id/btnPencil"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:background="@drawable/pencil" />
+                    android:background="@drawable/pencil"/>
             </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -103,7 +104,7 @@
             <ListView
                 android:id="@+id/listview_shapes"
                 android:layout_width="85dp"
-                android:layout_height="625dp"
+                android:layout_height="635dp"
                 android:choiceMode="singleChoice"
                 android:listSelector="@color/Blue"
                 android:paddingBottom="10dp" />
@@ -128,13 +129,12 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="7dp"
-            android:layout_height="630dp"
+            android:layout_height="635dp"
             android:background="@android:color/black"></androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_marginTop="5dp"
         android:layout_height="5dp"
         android:background="@android:color/black">
 
