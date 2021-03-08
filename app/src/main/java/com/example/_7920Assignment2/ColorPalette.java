@@ -1,11 +1,15 @@
 package com.example._7920Assignment2;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -50,33 +54,27 @@ public class ColorPalette {
         return color;
     }
 
-    //bind colors to gridview adapter
-    public static android.widget.ListAdapter Create(Context context, int resource) {
-        // Get the ArrayList of HSV colors
-        final ArrayList colors = HSVColors();
+    //color list adapter to bind listview containing all colors
+    public static class ColorListAdapter extends ArrayAdapter<Integer> {
 
-        // Create an ArrayAdapter using colors list
-        ArrayAdapter<Integer> ad = new ArrayAdapter<Integer>(context, resource, colors) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView view = (TextView) super.getView(position, convertView, parent);
-                int currentColor = (int) colors.get(position);
-                view.setBackgroundColor(currentColor);
-                view.setText("");
-                AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
-                        AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT
-                );
-                view.setLayoutParams(lp);
-                AbsListView.LayoutParams params = (AbsListView.LayoutParams) view.getLayoutParams();
-                params.width = 40;
-                params.height = 40;
-                view.setLayoutParams(params);
-                view.requestLayout();
-                return view;
+        public ColorListAdapter(Activity context, ArrayList<Integer> colors) {
+            super(context, 0, colors);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View listItemView = convertView;
+
+            if (listItemView == null) {
+                listItemView = LayoutInflater.from(getContext()).inflate(
+                        R.layout.colors_list, parent, false);
             }
-        };
-        return ad;
+            int color = getItem(position);
+            ImageView colorImage =  listItemView.findViewById(R.id.color);
+            colorImage.setBackgroundColor(color);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(50, 40);
+            colorImage.setLayoutParams(layoutParams);
+            return listItemView;
+        }
     }
-
-
 }

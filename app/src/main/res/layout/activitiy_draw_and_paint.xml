@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="@android:color/black">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <GridView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/colorGrid"
@@ -14,11 +23,13 @@
         android:layout_marginBottom="0.05in"
         android:columnWidth="40px"
         android:gravity="center"
-        android:horizontalSpacing="0dp"
+        android:listSelector="@color/Blue"
+        android:choiceMode="singleChoice"
+        android:verticalSpacing="2dp"
+        android:horizontalSpacing="2dp"
         android:numColumns="auto_fit"
         android:padding="5px"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="0dp"
         android:visibility="visible">
 
     </GridView>
@@ -33,7 +44,7 @@
     <RadioGroup
         android:id="@+id/radioDrawingMode"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="30dp"
         android:layout_marginLeft="0.9in"
         android:orientation="horizontal">
 
@@ -42,14 +53,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:textSize="22dp"
+            android:textSize="18dp"
             android:text="Free Hand" />
 
         <RadioButton
             android:id="@+id/radioAutomatic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="22dp"
+            android:textSize="18dp"
             android:text="Automatic" />
 
     </RadioGroup>
@@ -70,7 +81,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="635dp"
+            android:layout_height="614dp"
             android:background="@android:color/white"
             android:orientation="vertical">
 
@@ -90,7 +101,7 @@
                 <ImageButton
                     android:id="@+id/btnPencil"
                     android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_height="45dp"
                     android:background="@drawable/pencil"/>
             </LinearLayout>
 
@@ -104,7 +115,7 @@
             <ListView
                 android:id="@+id/listview_shapes"
                 android:layout_width="85dp"
-                android:layout_height="635dp"
+                android:layout_height="614dp"
                 android:choiceMode="singleChoice"
                 android:listSelector="@color/Blue"
                 android:paddingBottom="10dp" />
@@ -114,7 +125,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="5dp"
-            android:layout_height="635dp"
+            android:layout_height="614dp"
             android:background="@android:color/black">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -122,14 +133,14 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/drawingViewLayout"
             android:layout_width="500.95dp"
-            android:layout_height="635dp"
+            android:layout_height="614dp"
             android:background="@android:color/white">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="7dp"
-            android:layout_height="635dp"
+            android:layout_height="614dp"
             android:background="@android:color/black"></androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
@@ -147,31 +158,38 @@
         android:background="@android:color/holo_blue_light"
         android:orientation="horizontal"
 
-        android:padding="0.05in">
+        android:padding="0.03in">
 
         <ImageButton
             android:id="@+id/btnUndo"
-            android:layout_width="60dp"
-            android:layout_height="65dp"
+            android:layout_width="48dp"
+            android:layout_height="52dp"
             android:layout_gravity="start"
             android:layout_marginLeft="0.10in"
             android:background="@drawable/undo" />
 
         <ImageButton
             android:id="@+id/btnClearAll"
-            android:layout_width="60dp"
-            android:layout_height="65dp"
+            android:layout_width="48dp"
+            android:layout_height="52dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginLeft="1.10in"
+            android:layout_marginLeft="1.30in"
             android:background="@drawable/reset" />
 
         <ImageButton
             android:id="@+id/btnSave"
-            android:layout_width="60dp"
-            android:layout_height="65dp"
+            android:layout_width="48dp"
+            android:layout_height="52dp"
             android:layout_gravity="end"
-            android:layout_marginLeft="1.10in"
+            android:layout_marginLeft="1.30in"
             android:background="@drawable/save" />
 
     </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="7.74dp"
+        android:background="@android:color/black">
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </LinearLayout>

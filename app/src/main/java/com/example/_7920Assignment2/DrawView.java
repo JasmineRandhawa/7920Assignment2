@@ -8,8 +8,11 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -49,7 +52,7 @@ public class DrawView extends View {
     private boolean isTopDirection = false;
     private String drawingMode;
     private String selectedShape;
-    private int selectedColor;
+    private int selectedColor = -1;
 
 
     //constructor
@@ -58,7 +61,6 @@ public class DrawView extends View {
         context = cntxt;
         selectedShape = Shape.Custom;
         drawingMode = Shape.FreeHandDrawingMode;
-        selectedColor = Color.MAGENTA;
         mPath = new Path();
         pdList = new ArrayList<>();
         pointList = new ArrayList<>();
@@ -137,7 +139,24 @@ public class DrawView extends View {
     //show alert when shape not selected
     public void ShowAlert(String message)
     {
-       Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
+        int toastDurationInMilliSeconds = 400;
+        Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+
+        CountDownTimer toastCountDown;
+        toastCountDown = new CountDownTimer(toastDurationInMilliSeconds, 400 ) {
+            public void onTick(long millisUntilFinished) {
+                toast.show();
+            }
+            public void onFinish() {
+                toast.cancel();
+            }
+        };
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.activity_dialog, null);
+        toast.setView(view);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+        toastCountDown.start();
     }
 
 
@@ -146,6 +165,10 @@ public class DrawView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
+        if(selectedColor == -1) {
+            ShowAlert("Please select color!");
+            return  true;
+        }
         if (selectedShape.equals("Custom"))
         {
             int x = (int) event.getX();

@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -72,7 +73,7 @@ public class DrawAndPaint extends AppCompatActivity {
     private void CreateColorPalette()
     {
         GridView colorPalletteGrid = (GridView) findViewById(R.id.colorGrid);
-        ListAdapter colorPalleteListAdapter = ColorPalette.Create(context, android.R.layout.simple_list_item_1);
+        ListAdapter colorPalleteListAdapter =  new ColorPalette.ColorListAdapter(this,ColorPalette.HSVColors());
         colorPalletteGrid.setAdapter(colorPalleteListAdapter);
         colorPalletteGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -80,18 +81,7 @@ public class DrawAndPaint extends AppCompatActivity {
                                     int position, long id) {
                 selectedColor = parent.getItemAtPosition(position).toString();
                 view.setSelected(true);
-                if (prevView == null) {
-                    prevView =  view;
-                    prevColor = Integer.parseInt(selectedColor);
-                }
-                else
-                {
-                    prevView.setBackgroundColor(prevColor);
-                    prevView = null;
-                    prevColor = -1;
-                }
                 drawingView.SetPaintColor(Integer.parseInt(selectedColor));
-                view.setBackground(ContextCompat.getDrawable(context, R.drawable.list_selector));
             }
         });
     }
@@ -107,7 +97,7 @@ public class DrawAndPaint extends AppCompatActivity {
         shapes.add(new Shape(Shape.TriangleSolid,R.drawable.triangle_solid,5));
         shapes.add(new Shape(Shape.TriangleStroke,R.drawable.triangle_stroke,6));
 
-        ShapeListAdapter shapesAdapter = new ShapeListAdapter(this,shapes);
+        Shape.ShapeListAdapter shapesAdapter = new Shape.ShapeListAdapter(this,shapes);
         ListView listview_shapes = (ListView) findViewById(R.id.listview_shapes);
         listview_shapes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
@@ -118,7 +108,6 @@ public class DrawAndPaint extends AppCompatActivity {
             }
         });
         listview_shapes.setAdapter(shapesAdapter);
-
     }
 
     //add  drawng view  to screen
@@ -140,13 +129,14 @@ public class DrawAndPaint extends AppCompatActivity {
                 try {
                     drawingView.saveDrawing();
                 } catch (FileNotFoundException e) {
-                    Toast.makeText(context, "Error in saving", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "Error in saving", Toast.LENGTH_SHORT).show();
                 }
                 Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
                         +  File.separator + "Pictures" + File.separator);
-                Intent intent = new Intent(Intent.ACTION_PICK,uri);
-                intent.setDataAndType(uri, "resource/folder");
-                startActivity(intent);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT,uri);
+                intent.setDataAndType(uri, "image/*");
+                intent.setAction("android.intent.action.PICK");
+                startActivityForResult(Intent.createChooser(intent, "Drawing saved in"), 101);
             }
         });
 
@@ -200,28 +190,5 @@ public class DrawAndPaint extends AppCompatActivity {
         });
         LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutPencil);
         freeHandImage.setBackgroundColor(Color.BLUE);
-    }
-
-
-    //shape list adapter to bind listview containing all shapes
-    public class ShapeListAdapter extends ArrayAdapter<Shape> {
-
-        public ShapeListAdapter(Activity context, ArrayList<Shape> shapes) {
-            super(context, 0, shapes);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View listItemView = convertView;
-            if (listItemView == null) {
-                listItemView = LayoutInflater.from(getContext()).inflate(
-                        R.layout.shapes_list, parent, false);
-            }
-            Shape shape = getItem(position);
-            ImageView shapeImage = (ImageView) listItemView.findViewById(R.id.shape);
-            shapeImage.setImageResource((int) shape.getResourceId());
-            return listItemView;
-        }
-
     }
 }
