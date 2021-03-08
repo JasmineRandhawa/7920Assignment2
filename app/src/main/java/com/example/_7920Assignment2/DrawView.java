@@ -301,10 +301,14 @@ public class DrawView extends View {
                         mPath.lineTo(mStartX, mStartY - radius);
                         mPath.close();
                     }
-                    else if (selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke))
-                        mPath.addOval(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
-                    else if (selectedShape.equals(Shape.RectangleSolid) || selectedShape.equals(Shape.RectangleStroke))
-                        mPath.addRect(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
+                    else if (selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke)) {
+                        float distance = Utility.DistanceBetweenTwoPoints(mStartX,  mEndX,mStartY, mEndY);
+                        mPath.addCircle(mStartX, mStartY, distance/2, Path.Direction.CW);
+                    }
+                    else if (selectedShape.equals(Shape.RectangleSolid) || selectedShape.equals(Shape.RectangleStroke)) {
+                        float distance = Utility.DistanceBetweenTwoPoints(mStartX,  mEndX,mStartY, mEndY);
+                        mPath.addRect(mStartX, mStartY, mEndX+distance, mEndY+distance, Path.Direction.CW);
+                    }
                     else if (selectedShape.equals(Shape.Line)) {
                         mPath.moveTo(mStartX, mStartY);
                         mPath.lineTo(mEndX, mEndY);
