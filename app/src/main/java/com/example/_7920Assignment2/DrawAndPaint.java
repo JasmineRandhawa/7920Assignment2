@@ -24,12 +24,14 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /* Draw and Paint Shapes
@@ -88,8 +90,8 @@ public class DrawAndPaint extends AppCompatActivity {
         shapes.add(new Shape(Shape.Line,R.drawable.line,0));
         shapes.add(new Shape(Shape.RectangleSolid,R.drawable.rectangle_solid,1));
         shapes.add(new Shape(Shape.RectangleStroke,R.drawable.rectangle_stroke,2));
-        shapes.add(new Shape(Shape.OvalSolid,R.drawable.oval_solid,3));
-        shapes.add(new Shape(Shape.OvalStroke,R.drawable.oval_stroke,4));
+        shapes.add(new Shape(Shape.CircleSolid,R.drawable.oval_solid,3));
+        shapes.add(new Shape(Shape.CircleStroke,R.drawable.oval_stroke,4));
         shapes.add(new Shape(Shape.TriangleSolid,R.drawable.triangle_solid,5));
         shapes.add(new Shape(Shape.TriangleStroke,R.drawable.triangle_stroke,6));
 
@@ -121,11 +123,15 @@ public class DrawAndPaint extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                drawingView.saveDrawing();
+                try {
+                    drawingView.saveDrawing();
+                } catch (FileNotFoundException e) {
+                    Toast.makeText(context, "Error in saving", Toast.LENGTH_LONG).show();
+                }
                 Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
                         +  File.separator + "Pictures" + File.separator);
                 Intent intent = new Intent(Intent.ACTION_PICK,uri);
-                intent.setType("image/*");
+                intent.setDataAndType(uri, "resource/folder");
                 startActivity(intent);
             }
         });
@@ -190,6 +196,4 @@ public class DrawAndPaint extends AppCompatActivity {
         }
 
     }
-
-
 }

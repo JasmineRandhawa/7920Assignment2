@@ -10,8 +10,8 @@ public class Shape {
     public long Position;
     public static String RectangleStroke = "Rectangle Solid";
     public static String RectangleSolid = "Rectangle Stroke";
-    public static String OvalSolid = "Oval Solid";
-    public static String OvalStroke = "Oval Stroke";
+    public static String CircleSolid = "Circle Solid";
+    public static String CircleStroke = "Circle Stroke";
     public static String TriangleSolid = "Triangle Solid";
     public static String TriangleStroke = "Triangle Stroke";
     public static String Line = "Line";

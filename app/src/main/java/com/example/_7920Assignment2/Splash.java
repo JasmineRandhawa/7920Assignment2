@@ -6,6 +6,7 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+/* splash screen acticity */
 public class Splash extends AppCompatActivity {
 
     @Override

@@ -73,9 +73,9 @@ class DrawingLine extends View {
     //set shape and fill-unfill
     public void SetShape(String shapeString) {
         selectedShape = shapeString;
-        if (selectedShape.equals(Shape.OvalStroke))
+        if (selectedShape.equals(Shape.CircleStroke))
             isFill = false;
-        else if (selectedShape.equals(Shape.OvalSolid))
+        else if (selectedShape.equals(Shape.CircleSolid))
             isFill = true;
     }
 
@@ -236,7 +236,6 @@ class DrawingLine extends View {
                 }
                 mCanvas.drawBitmap(mBitmap, 0, 0, null);
             }
-            invalidate();
         }
     }
 
@@ -279,6 +278,4 @@ class DrawingLine extends View {
             }
         }
     }
-
-
 }
