@@ -85,9 +85,12 @@ public class DrawView extends View {
         if (selectedShape.equals(Shape.Line) ||
             selectedShape.equals(Shape.TriangleStroke) ||
             selectedShape.equals(Shape.CircleStroke) ||
+            selectedShape.equals(Shape.RectangleStroke) ||
             selectedShape.equals(Shape.Custom))
             isFill = false;
-        else if (selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.CircleSolid))
+        else if (selectedShape.equals(Shape.TriangleSolid) ||
+                selectedShape.equals(Shape.CircleSolid) ||
+                selectedShape.equals(Shape.RectangleSolid))
             isFill = true;
     }
 
@@ -300,6 +303,8 @@ public class DrawView extends View {
                     }
                     else if (selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke))
                         mPath.addOval(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
+                    else if (selectedShape.equals(Shape.RectangleSolid) || selectedShape.equals(Shape.RectangleStroke))
+                        mPath.addRect(mStartX, mStartY, mEndX, mEndY, Path.Direction.CW);
                     else if (selectedShape.equals(Shape.Line)) {
                         mPath.moveTo(mStartX, mStartY);
                         mPath.lineTo(mEndX, mEndY);
