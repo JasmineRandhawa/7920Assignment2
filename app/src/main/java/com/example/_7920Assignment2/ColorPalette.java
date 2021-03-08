@@ -34,7 +34,6 @@ public class ColorPalette {
             colors.add(HSVColor(0, 0, b));
         }
         for (int h = 0; h <= 360; h += 20) {
-            //colors.add(createColor(h, 1, .25f));
             colors.add(HSVColor(h, 1, .5f));
             colors.add(HSVColor(h, 1, .75f));
         }
