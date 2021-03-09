@@ -15,8 +15,8 @@ public class Shape {
     public String ShapeName;
     public long ResourceId;
     public long Position;
-    public static String RectangleStroke = "Rectangle Solid";
-    public static String RectangleSolid = "Rectangle Stroke";
+    public static String SquareStroke = "Square Solid";
+    public static String SquareSolid = "Square Stroke";
     public static String CircleSolid = "Circle Solid";
     public static String CircleStroke = "Circle Stroke";
     public static String TriangleSolid = "Triangle Solid";

@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">MyPaint</string>
+    <string name="app_name">Lets Draw</string>
     <item name="drawingView" type="id" />
 </resources>

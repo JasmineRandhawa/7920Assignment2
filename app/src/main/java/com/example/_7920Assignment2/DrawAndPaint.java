@@ -1,23 +1,16 @@
 package com.example._7920Assignment2;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -25,10 +18,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -87,21 +78,20 @@ public class DrawAndPaint extends AppCompatActivity {
     }
 
     //add  shapes palette  to screen
-    private void CreateShapesView()
-    {
-        shapes.add(new Shape(Shape.Line,R.drawable.line,0));
-        shapes.add(new Shape(Shape.RectangleSolid,R.drawable.rectangle_solid,1));
-        shapes.add(new Shape(Shape.RectangleStroke,R.drawable.rectangle_stroke,2));
-        shapes.add(new Shape(Shape.CircleSolid,R.drawable.circle_solid,3));
-        shapes.add(new Shape(Shape.CircleStroke,R.drawable.circle_stroke,4));
-        shapes.add(new Shape(Shape.TriangleSolid,R.drawable.triangle_solid,5));
-        shapes.add(new Shape(Shape.TriangleStroke,R.drawable.triangle_stroke,6));
+    private void CreateShapesView() {
+        shapes.add(new Shape(Shape.Line, R.drawable.line, 0));
+        shapes.add(new Shape(Shape.SquareSolid, R.drawable.square_solid, 1));
+        shapes.add(new Shape(Shape.SquareStroke, R.drawable.square_stroke, 2));
+        shapes.add(new Shape(Shape.CircleSolid, R.drawable.circle_solid, 3));
+        shapes.add(new Shape(Shape.CircleStroke, R.drawable.circle_stroke, 4));
+        shapes.add(new Shape(Shape.TriangleSolid, R.drawable.triangle_solid, 5));
+        shapes.add(new Shape(Shape.TriangleStroke, R.drawable.triangle_stroke, 6));
 
-        Shape.ShapeListAdapter shapesAdapter = new Shape.ShapeListAdapter(this,shapes);
+        Shape.ShapeListAdapter shapesAdapter = new Shape.ShapeListAdapter(this, shapes);
         ListView listview_shapes = (ListView) findViewById(R.id.listview_shapes);
         listview_shapes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
-                selectedShapeListItem = Shape.GetItemForAtPosition(position,shapes);
+                selectedShapeListItem = Shape.GetItemForAtPosition(position, shapes);
                 drawingView.SetShape(selectedShapeListItem.getShapeName());
                 LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
                 freeHandImage.setBackgroundColor(Color.WHITE);
@@ -127,16 +117,24 @@ public class DrawAndPaint extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    drawingView.saveDrawing();
+                    String fileName = drawingView.saveDrawing();
+                    if(!fileName.equals(""))
+                    {
+                        File folder = new File(Environment.getExternalStorageDirectory().getPath()
+                                + File.separator + "Pictures" + File.separator);
+                        File[] allFiles = folder.listFiles();
+                        if(allFiles!=null && allFiles.length>0) {
+                            File imageFile = allFiles[allFiles.length - 2];
+                            File lastFile = allFiles[allFiles.length - 1];
+                            lastFile.delete();
+                            new SingleMediaScanner(context, imageFile);
+                        }
+                    }
+                    else
+                        Toast.makeText(context, "Error in saving", Toast.LENGTH_SHORT).show();
                 } catch (FileNotFoundException e) {
                     Toast.makeText(context, "Error in saving", Toast.LENGTH_SHORT).show();
                 }
-                Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
-                        +  File.separator + "Pictures" + File.separator);
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT,uri);
-                intent.setDataAndType(uri, "image/*");
-                intent.setAction("android.intent.action.PICK");
-                startActivityForResult(Intent.createChooser(intent, "Drawing saved in"), 101);
             }
         });
 
@@ -163,7 +161,7 @@ public class DrawAndPaint extends AppCompatActivity {
         });
 
 
-        RadioGroup radioGroupDrawingMode = (RadioGroup) findViewById(R.id.radioDrawingMode);
+        RadioGroup radioGroupDrawingMode =  findViewById(R.id.radioDrawingMode);
         radioGroupDrawingMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             @Override
@@ -184,11 +182,39 @@ public class DrawAndPaint extends AppCompatActivity {
                 ListView shapeListView = (ListView) findViewById(R.id.listview_shapes);
                 CreateShapesView();
                 drawingView.SetShape("Custom");
-                LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutPencil);
+                LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
                 freeHandImage.setBackgroundColor(Color.BLUE);
             }
         });
-        LinearLayout freeHandImage = (LinearLayout) findViewById(R.id.layoutPencil);
+        LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
         freeHandImage.setBackgroundColor(Color.BLUE);
     }
+
+    //open saved image
+    public class SingleMediaScanner implements MediaScannerConnection.MediaScannerConnectionClient {
+
+        private final MediaScannerConnection mMs;
+        private final File mFile;
+
+        public SingleMediaScanner(Context context, File f) {
+            mFile = f;
+            mMs = new MediaScannerConnection(context, this);
+            mMs.connect();
+        }
+
+        public void onMediaScannerConnected() {
+            mMs.scanFile(mFile.getAbsolutePath(), null);
+        }
+
+        public void onScanCompleted(String path, Uri uri) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            mMs.disconnect();
+            finish();
+        }
+    }
+
 }

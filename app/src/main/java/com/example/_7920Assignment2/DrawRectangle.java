@@ -77,9 +77,9 @@ class DrawRectangle extends View {
     //set shape and fill-unfill
     public void SetShape(String shapeString) {
         selectedShape = shapeString;
-        if (selectedShape.equals(Shape.RectangleStroke))
+        if (selectedShape.equals(Shape.SquareStroke))
             isFill = false;
-        else if (selectedShape.equals(Shape.RectangleSolid))
+        else if (selectedShape.equals(Shape.SquareSolid))
             isFill = true;
     }
 

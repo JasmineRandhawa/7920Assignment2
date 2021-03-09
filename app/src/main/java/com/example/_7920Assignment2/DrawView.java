@@ -3,10 +3,8 @@ package com.example._7920Assignment2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Environment;
@@ -23,7 +21,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,12 +87,12 @@ public class DrawView extends View {
         if (selectedShape.equals(Shape.Line) ||
             selectedShape.equals(Shape.TriangleStroke) ||
             selectedShape.equals(Shape.CircleStroke) ||
-            selectedShape.equals(Shape.RectangleStroke) ||
+            selectedShape.equals(Shape.SquareStroke) ||
             selectedShape.equals(Shape.Custom))
             isFill = false;
         else if (selectedShape.equals(Shape.TriangleSolid) ||
                 selectedShape.equals(Shape.CircleSolid) ||
-                selectedShape.equals(Shape.RectangleSolid))
+                selectedShape.equals(Shape.SquareSolid))
             isFill = true;
     }
 
@@ -301,7 +303,7 @@ public class DrawView extends View {
                         float distance = Utility.DistanceBetweenTwoPoints(mStartX,  mEndX,mStartY, mEndY);
                         mPath.addCircle(mStartX, mStartY, distance/2, Path.Direction.CW);
                     }
-                    else if (selectedShape.equals(Shape.RectangleSolid) || selectedShape.equals(Shape.RectangleStroke)) {
+                    else if (selectedShape.equals(Shape.SquareSolid) || selectedShape.equals(Shape.SquareStroke)) {
                         float distance = Utility.DistanceBetweenTwoPoints(mStartX,  mEndX,mStartY, mEndY);
                         mPath.addRect(mStartX, mStartY, mEndX+distance, mEndY+distance, Path.Direction.CW);
                     }
@@ -450,14 +452,14 @@ public class DrawView extends View {
     }
 
     //save drawing
-    public void saveDrawing() throws FileNotFoundException {
+    public  String saveDrawing() throws FileNotFoundException {
         String storagePath = Environment.getExternalStorageDirectory().getAbsolutePath();
         String targetDirPath = storagePath + "/Pictures/";
         File targetDir = new File(targetDirPath);
         if (!targetDir.exists()) {
             if (false == targetDir.mkdirs()) {
 
-                return;
+                return "";
             }
         }
         if (targetDir.isDirectory()) {
@@ -466,20 +468,28 @@ public class DrawView extends View {
                 new File(targetDir, children[i]).delete();
             }
         }
-        String filePath = targetDirPath + UUID.randomUUID().toString() + ".jpg";
+        Date date = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
+        String strDate = dateFormat.format(date);
+        String fileName = "Drawing"+strDate;
+        String filePath = targetDirPath + "Drawing"+strDate + ".png";
         FileOutputStream fos = new FileOutputStream(filePath);
         try {
-            this.getDrawingCache().compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            this.getDrawingCache().compress(Bitmap.CompressFormat.PNG, 100, fos);
+            this.getDrawingCache().setHasAlpha(true);
             MediaStore.Images.Media.insertImage(context.getContentResolver(), this.getDrawingCache(),
-                                           null, "drawing");
-            Toast.makeText(context, "Drawing Saved", Toast.LENGTH_LONG).show();
+                                           "drawing", "drawing");
+            Toast.makeText(context, "Drawing Saved", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(context, "Error in saving", Toast.LENGTH_LONG).show();
+            return "";
         } finally {
             try {
                 fos.close();
+                return fileName;
             } catch (IOException e) {
                 Toast.makeText(context, "Error in saving", Toast.LENGTH_LONG).show();
+                return "";
             }
         }
     }
