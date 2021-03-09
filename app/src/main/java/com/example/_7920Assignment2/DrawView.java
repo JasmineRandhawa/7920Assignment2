@@ -135,6 +135,7 @@ public class DrawView extends View {
             mPaint.setColor(selectedColor);
             canvas.drawPath(mPath, mPaint);
             canvas.drawBitmap(mBitmap, 0, 0, null);
+            invalidate();
         }
     }
 
@@ -212,8 +213,6 @@ public class DrawView extends View {
                     mStartX = (int) event.getX();
                     mStartY = (int) event.getY();
                     mPath.moveTo(mStartX, mStartY);
-                    if (selectedShape.equals(Shape.Line))
-                        pointList.add(new PathPoint(x, y));
                     invalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -224,17 +223,18 @@ public class DrawView extends View {
                     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
                         if (selectedShape.equals(Shape.CircleSolid) || selectedShape.equals(Shape.CircleStroke))
                             mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
-                        else if (selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.TriangleStroke)) {
+                        else if (selectedShape.equals(Shape.Line) ||
+                                selectedShape.equals(Shape.TriangleSolid) || selectedShape.equals(Shape.TriangleStroke)) {
                             mEndX = x;
                             mEndY = y;
                             mPath.lineTo(mEndX, mEndY);
                             pathList.add(new PathTracker(mStartX, mStartY, mEndX, mEndY));
                         }
                     }
-                    mStartX = x;
-                    mStartY = y;
-                    if (selectedShape.equals(Shape.Line))
-                        pointList.add(new PathPoint(x, y));
+                    if(!selectedShape.equals(Shape.Line)) {
+                        mStartX = x;
+                        mStartY = y;
+                    }
                     invalidate();
                     break;
 
@@ -257,17 +257,13 @@ public class DrawView extends View {
                         pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
                     }
                     else if(selectedShape.equals(Shape.Line)) {
-                        if (pointList != null && pointList.size() > 0) {
                             mPath = new Path();
-                            pointList = Utility.RemoveDuplicates(pointList);
-                            // find direction of triangle
-                            PathPoint startPoint = new PathPoint(pointList.get(0).x, pointList.get(0).y);
-                            PathPoint endPoint = new PathPoint(pointList.get(pointList.size()-1).x, pointList.get(pointList.size()-1).y);
-                            mPath.moveTo(startPoint.x, startPoint.y);
-                            mPath.lineTo(endPoint.x, endPoint.y);
-                        }
-                        pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
-                        pointList = new ArrayList<>();
+                            List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                            finalPoints.add(new PathPoint(mStartX, mStartY));
+                            finalPoints.add(new PathPoint(mEndX, mEndY));
+                            mPath.moveTo(mStartX, mStartY);
+                            mPath.lineTo(mEndX, mEndY);
+                            pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
                     }
                     mPath = new Path();
                     invalidate();
