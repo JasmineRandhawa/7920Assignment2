@@ -176,18 +176,18 @@ public class DrawAndPaint extends AppCompatActivity {
         drawingView.SetDrawingMode(Shape.FreeHandDrawingMode);
 
         ImageButton btnPencil =  findViewById(R.id.btnPencil);
+        LinearLayout customPencilImage =  findViewById(R.id.layoutPencil);
         btnPencil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ListView shapeListView = (ListView) findViewById(R.id.listview_shapes);
                 CreateShapesView();
-                drawingView.SetShape("Custom");
-                LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
-                freeHandImage.setBackgroundColor(Color.BLUE);
+                drawingView.SetShape(Shape.Custom);
+                customPencilImage.setBackgroundColor(Color.BLUE);
             }
         });
-        LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
-        freeHandImage.setBackgroundColor(Color.BLUE);
+        drawingView.SetShape(Shape.Custom);
+        customPencilImage.setBackgroundColor(Color.BLUE);
     }
 
     //open saved image
