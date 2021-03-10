@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Environment;
@@ -170,7 +171,8 @@ public class DrawView extends View {
         toastCountDown.start();
     }
 
-
+    int startx,starty;
+    int left=0,right=0,top=0,bottom=0;
     // on touch event
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -215,7 +217,7 @@ public class DrawView extends View {
             }
             return true;
         }
-        else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode)) {
+        else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) ) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();
@@ -229,13 +231,12 @@ public class DrawView extends View {
                     if (selectedShape.equals(Shape.Line))
                         pointList.add(new PathPoint(mStartX, mStartY));
                     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-                            if (selectedShape.equals(Shape.Line) ) {
-                                mEndX = x;
-                                mEndY = y;
-                                mPath.lineTo(mEndX, mEndY);
-                            }
-                            else
-                                mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
+                        if (selectedShape.equals(Shape.Line)) {
+                            mEndX = x;
+                            mEndY = y;
+                            mPath.lineTo(mEndX, mEndY);
+                        } else
+                            mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
                     }
 
                     if (!isLine) {
@@ -248,16 +249,21 @@ public class DrawView extends View {
                     if (isTriangle) {
                         mEndX = (int) event.getX();
                         mEndY = (int) event.getY();
-                        List<PathPoint> cornerPoints = MyPointClass.GetPathCorners(mPath);
+                        List<PathPoint> cornerPoints = MyPointClass.GetPathCornersTriangle(mPath);
                         DrawTriangle(cornerPoints);
                     }
-                    else if (isSquare) {
+                   /* else if (isSquare) {
                         mEndX = (int) event.getX();
                         mEndY = (int) event.getY();
-                        List<PathPoint> cornerPoints = MyPointClass.GetPathCorners(mPath);
-                        List<PathPoint> refinedCornerPoints = MyPointClass.AllignSquareLines(cornerPoints);
-                        DrawSquare(refinedCornerPoints);
-                    } else if (isCircle)
+                        List<PathPoint> cornerPoints = MyPointClass.GetPathCornersTriangle(mPath);
+                        //cornerPoints = MyPointClass.AllignSquareLines(cornerPoints);
+                        //DrawSquare(cornerPoints);
+                        Path path= MyPointClass.AllignSquareLines(cornerPoints);
+                        pdList.add(new PathData(path, pointList, selectedColor, isFill));
+                    }*/
+                    else if (isSquare)
+                        DrawSquare();
+                    else if (isCircle)
                         DrawCircle();
                     else if(isLine)
                         DrawLine();
@@ -316,9 +322,6 @@ public class DrawView extends View {
         return true;
     }
 
-
-
-
     // Draw free hand Line
     public void DrawLine()
     {
@@ -330,7 +333,6 @@ public class DrawView extends View {
         path.lineTo(mEndX, mEndY);
         pdList.add(new PathData(path, pointList, selectedColor, isFill));
     }
-
 
     // Draw free hand Circle
     public void DrawCircle()
@@ -361,9 +363,22 @@ public class DrawView extends View {
     }
 
     // Draw free hand Square
-    public void DrawSquare(List<PathPoint> cornerPoints)
+    public void DrawSquare()
     {
-        if (cornerPoints != null && cornerPoints.size()  == 4) {
+
+        PathPoint pathMidpoint = MyPointClass.CalculatePathMidPoint(mPath);
+        PathPoint circleCenterPoint = MyPointClass.CalculateCircleCenter(mStartX, pathMidpoint.getX(), mStartY, pathMidpoint.getY());
+        float radius =  MyPointClass.DistanceBetweenTwoPoints(mStartX, circleCenterPoint.getX(), mStartY, circleCenterPoint.getY());
+        mPath= new Path();
+        Path path = new Path();
+        path.addRect((float)circleCenterPoint.getX() - radius,(float)circleCenterPoint.getY()-radius ,
+                (float)circleCenterPoint.getX()+radius ,(float)circleCenterPoint.getY()+radius , Path.Direction.CW);
+        List<PathPoint> finalPoints = new ArrayList<>();
+        finalPoints.add(new PathPoint(mStartX, mStartY));
+        finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
+        pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
+
+       /* if (cornerPoints != null && cornerPoints.size()  == 4) {
             Path pathObj = new Path();
             pathObj.moveTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
             for (int i = 1; i <= cornerPoints.size() - 1; i++) {
@@ -371,7 +386,7 @@ public class DrawView extends View {
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
             pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
-        }
+        }*/
     }
 
 

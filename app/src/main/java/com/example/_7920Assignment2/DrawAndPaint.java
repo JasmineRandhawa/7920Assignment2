@@ -58,8 +58,6 @@ public class DrawAndPaint extends AppCompatActivity {
         SetUpImageButtons();
     }
 
-    View prevView = null;
-    int prevColor = -1;
     //add  color palette  to screen
     private void CreateColorPalette()
     {
@@ -112,7 +110,7 @@ public class DrawAndPaint extends AppCompatActivity {
 
     //setup options for drawing - Undo, save ,clearAll
     private void SetUpImageButtons() {
-        ImageButton saveButton = (ImageButton) findViewById(R.id.btnSave);
+        ImageButton saveButton =  findViewById(R.id.btnSave);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -138,7 +136,7 @@ public class DrawAndPaint extends AppCompatActivity {
             }
         });
 
-        ImageButton undoButton = (ImageButton) findViewById(R.id.btnUndo);
+        ImageButton undoButton =  findViewById(R.id.btnUndo);
         undoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,7 +144,7 @@ public class DrawAndPaint extends AppCompatActivity {
             }
         });
 
-        ImageButton resetButton = (ImageButton) findViewById(R.id.btnClearAll);
+        ImageButton resetButton =  findViewById(R.id.btnClearAll);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,7 +165,7 @@ public class DrawAndPaint extends AppCompatActivity {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 int selectedId = radioGroupDrawingMode.getCheckedRadioButtonId();
-                RadioButton radioDrawingModeButton = (RadioButton) findViewById(selectedId);
+                RadioButton radioDrawingModeButton =  findViewById(selectedId);
                 String drawingMode = radioDrawingModeButton.getText().toString();
                 drawingView.SetDrawingMode(drawingMode);
             }
@@ -180,7 +178,6 @@ public class DrawAndPaint extends AppCompatActivity {
         btnPencil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ListView shapeListView = (ListView) findViewById(R.id.listview_shapes);
                 CreateShapesView();
                 drawingView.SetShape(Shape.Custom);
                 customPencilImage.setBackgroundColor(Color.BLUE);

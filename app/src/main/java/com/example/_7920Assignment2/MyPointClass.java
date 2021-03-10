@@ -2,6 +2,8 @@ package com.example._7920Assignment2;
 
 import android.graphics.Path;
 import android.graphics.PathMeasure;
+import android.graphics.Rect;
+import android.graphics.RectF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,14 +54,6 @@ public class MyPointClass {
         return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 
-    //compute distnace betwwen two points
-    public static int PositiveDifferenceBetween(int x, int y) {
-        if (x > y)
-            return x - y;
-        else
-            return y - x;
-    }
-
     //compute cicle center point
     public static PathPoint CalculateCircleCenter(int x1, int x2, int y1, int y2) {
         return new PathPoint((x1 + x2) / 2, (y1 + y2) / 2);
@@ -95,44 +89,6 @@ public class MyPointClass {
         return pointList;
     }
 
-    // allign square lines
-    public static List<PathPoint> AllignSquareLines(List<PathPoint> cornerPoints) {
-        if (cornerPoints != null && cornerPoints.size() > 2) {
-            PathPoint firstPoint = new PathPoint(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
-            PathPoint secondPoint = new PathPoint(cornerPoints.get(1).getX(), cornerPoints.get(1).getY());
-            PathPoint thirdPoint = new PathPoint(cornerPoints.get(1).getX(), cornerPoints.get(1).getY());
-            PathPoint fourthPoint;
-            boolean firstRightDirection = cornerPoints.get(1).getX() > cornerPoints.get(0).getX();
-            if (firstRightDirection) {
-                int vertDistance = MyPointClass.PositiveDifferenceBetween(thirdPoint.getX(), secondPoint.getY());
-                secondPoint.setY(firstPoint.getY());
-                if (secondPoint.getY() > thirdPoint.getY()) {
-                    thirdPoint = new PathPoint(secondPoint.getX(), secondPoint.getY() - vertDistance);
-                    fourthPoint = new PathPoint(firstPoint.getX(), secondPoint.getY() - vertDistance);
-                } else {
-                    thirdPoint = new PathPoint(secondPoint.getX(), secondPoint.getY() + vertDistance);
-                    fourthPoint = new PathPoint(firstPoint.getX(), secondPoint.getY() + vertDistance);
-                }
-            } else {
-                secondPoint.setX(firstPoint.getX());
-                int horiDistance = MyPointClass.PositiveDifferenceBetween(thirdPoint.getX(), secondPoint.getX());
-                if (secondPoint.getX() > thirdPoint.getX()) {
-
-                    thirdPoint = new PathPoint(secondPoint.getX() - horiDistance, secondPoint.getY());
-                    fourthPoint = new PathPoint(thirdPoint.getX() - horiDistance, secondPoint.getY());
-                } else {
-                    thirdPoint = new PathPoint(secondPoint.getX() + horiDistance, secondPoint.getY());
-                    fourthPoint = new PathPoint(firstPoint.getX() + horiDistance, secondPoint.getY());
-                }
-            }
-            cornerPoints.remove(2);
-            cornerPoints.remove(1);
-            cornerPoints.add(secondPoint);
-            cornerPoints.add(thirdPoint);
-            cornerPoints.add(fourthPoint);
-        }
-        return cornerPoints;
-    }
 
     //check next 5 points are increasing or decreasing to judge a turn in path
     public static boolean CheckNextFivePoints(List<PathPoint> pointList, int index, String direction) {
@@ -159,44 +115,82 @@ public class MyPointClass {
         return checkChangeCount == lastIndex + 1;
     }
 
+    //check next 5 points are increasing or decreasing to judge a turn in path
+    public static String CheckDirection(List<PathPoint> pointList) {
+        String direction="";
+        int checkRight = 0;
+        int checkTop= 0;
+        int checkLeft= 0;
+        int checkBottom= 0;
+        int lastIndex = pointList.size()  - 1;
+        if (pointList.size() -  1 > 10)
+            lastIndex = 10;
+        PathPoint point = pointList.get(0);
+
+        for (int i = 1; i <= lastIndex-1; i++) {
+            PathPoint nextPoint = pointList.get(i);
+            if (point.x > nextPoint.x)
+                checkLeft++;
+
+             if (point.y > nextPoint.y)
+                checkTop++;
+
+             if (point.y < nextPoint.y)
+                checkBottom++;
+
+             if (point.x < nextPoint.x)
+                 checkRight++;
+        }
+        if(checkLeft > checkRight)
+            direction = "left";
+        else
+            direction =  "right";
+
+        if(checkBottom > checkTop)
+            direction =direction+"bottom";
+        else
+            direction =direction+"top";
+        return direction;
+    }
+
     // get Path corners
-    public static List<PathPoint> GetPathCorners(Path path) {
+    public static List<PathPoint> GetPathCornersTriangle(Path path) {
         List<PathPoint> cornerPoints = new ArrayList<PathPoint>();
         List<PathPoint> newPointList = MyPointClass.GetPoints(path);
         newPointList = MyPointClass.RemoveDuplicates(newPointList);
         if (newPointList != null && newPointList.size() > 0) {
             PathPoint firstPoint = newPointList.get(0);
             List<PathPoint> pointList = new ArrayList<>();
-            pointList.add(newPointList.get(0));
+            //pointList.add(newPointList.get(0));
             // first 10 points
             for (int i = 10; i <= newPointList.size() - 1; i++) {
                 pointList.add(newPointList.get(i));
             }
-                // find direction of triangle
-                PathPoint initialPointOfPath = new PathPoint(pointList.get(pointList.size() / 10).getX(),
-                        pointList.get(pointList.size() / 10).getY());
+            // find direction of triangle
+            PathPoint initialPointOfPath = new PathPoint(pointList.get(pointList.size() / 10).getX(),
+                    pointList.get(pointList.size() / 10).getY());
 
-                boolean isRightDirection = initialPointOfPath.getX() > firstPoint.getX();
-                boolean isTopDirection = initialPointOfPath.getY() < firstPoint.getY();
+            boolean isRightDirection = initialPointOfPath.getX() > firstPoint.getX();
+            boolean isTopDirection = initialPointOfPath.getY() < firstPoint.getY();
 
-                //add first corner of path
-                cornerPoints.add(firstPoint);
+            //add first corner of path
+            cornerPoints.add(firstPoint);
 
-                //find second corner of path
-                PathPoint secondCorner = GetNextCorner(pointList, 1, isRightDirection, isTopDirection);
-                if (secondCorner != null) {
-                    int indexOfSecondCornerInList = secondCorner.getPointIndex();
-                    cornerPoints.add(secondCorner);
-                    //find third corner of path
-                    List<PathPoint> nextList = MyPointClass.GetNextList(indexOfSecondCornerInList, pointList);
-                    if (nextList != null && nextList.size() > 0) {
-                        initialPointOfPath = new PathPoint(nextList.get(nextList.size() / 5).getX(),
-                                nextList.get(nextList.size() / 5).getY());
-                        isRightDirection = initialPointOfPath.getX() > secondCorner.getX();
-                        isTopDirection = initialPointOfPath.getY() < secondCorner.getY();
-                        PathPoint thirdCorner = GetNextCorner(nextList, 2, isRightDirection, isTopDirection);
-                        cornerPoints.add(thirdCorner);
-                    }
+            //find second corner of path
+            PathPoint secondCorner = GetNextCorner(pointList, 1, isRightDirection, isTopDirection);
+            if (secondCorner != null) {
+                int indexOfSecondCornerInList = secondCorner.getPointIndex();
+                cornerPoints.add(secondCorner);
+                //find third corner of path
+                List<PathPoint> nextList = MyPointClass.GetNextList(indexOfSecondCornerInList, pointList);
+                if (nextList != null && nextList.size() > 0) {
+                    initialPointOfPath = new PathPoint(nextList.get(nextList.size() / 5).getX(),
+                            nextList.get(nextList.size() / 5).getY());
+                    isRightDirection = initialPointOfPath.getX() > secondCorner.getX();
+                    isTopDirection = initialPointOfPath.getY() < secondCorner.getY();
+                    PathPoint thirdCorner = GetNextCorner(nextList, 2, isRightDirection, isTopDirection);
+                    cornerPoints.add(thirdCorner);
+                }
             }
         }
         return cornerPoints;
