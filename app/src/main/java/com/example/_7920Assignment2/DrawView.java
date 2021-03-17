@@ -442,7 +442,7 @@ public class DrawView extends View {
 
     // undo drawing steps
     public void RedoDrawing() {
-        if (pdList != null && pdList.size() > 0 && prevPathData != null) {
+        if (prevPathData != null) {
             mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
             pdList.add(prevPathData);
