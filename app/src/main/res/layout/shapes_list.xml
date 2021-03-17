@@ -9,5 +9,5 @@
     <ImageView
         android:id="@+id/shape"
         android:layout_width="40dp"
-        android:layout_height="45dp"/>
+        android:layout_height="40dp"/>
 </LinearLayout>

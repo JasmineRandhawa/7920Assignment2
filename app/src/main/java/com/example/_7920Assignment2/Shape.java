@@ -21,6 +21,8 @@ public class Shape {
     public static String CircleStroke = "Circle Stroke";
     public static String TriangleSolid = "Triangle Solid";
     public static String TriangleStroke = "Triangle Stroke";
+    public static String RhombusSolid = "Paralellogram Solid";
+    public static String RhombusStroke = "Paralellogram Stroke";
     public static String Line = "Line";
     public static String Custom = "Custom";
     public static String FreeHandDrawingMode = "Free Hand";
