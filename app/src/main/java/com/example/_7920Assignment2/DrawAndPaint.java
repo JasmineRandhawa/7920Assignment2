@@ -119,9 +119,9 @@ public class DrawAndPaint extends AppCompatActivity {
                 }
             });
             additional_shapes = new ArrayList<>();
-            additional_shapes.add(new Shape(Shape.RhombusStroke, R.drawable.square_stroke, 0));
-            additional_shapes.add(new Shape(Shape.RhombusSolid, R.drawable.square_solid, 1));
-            Shape.ShapeListAdapter addtionalShapesAdapter = new Shape.ShapeListAdapter(this, additional_shapes, 2);
+            additional_shapes.add(new Shape(Shape.RhombusSolid, R.drawable.square_solid, 0));
+            additional_shapes.add(new Shape(Shape.RhombusStroke, R.drawable.square_stroke, 1));
+             Shape.ShapeListAdapter addtionalShapesAdapter = new Shape.ShapeListAdapter(this, additional_shapes, 2);
             additional_listview_shapes.setAdapter(addtionalShapesAdapter);
         }
     }
