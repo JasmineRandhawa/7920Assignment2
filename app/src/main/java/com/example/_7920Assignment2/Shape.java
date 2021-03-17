@@ -21,12 +21,13 @@ public class Shape {
     public static String CircleStroke = "Circle Stroke";
     public static String TriangleSolid = "Triangle Solid";
     public static String TriangleStroke = "Triangle Stroke";
-    public static String RhombusSolid = "Paralellogram Solid";
-    public static String RhombusStroke = "Paralellogram Stroke";
+    public static String RhombusSolid = "Rhombus Solid";
+    public static String RhombusStroke = "Rhombus Stroke";
     public static String Line = "Line";
     public static String Custom = "Custom";
     public static String FreeHandDrawingMode = "Free Hand";
     public static String AutomaticDrawingmMode = "Automatic";
+
 
     //constructor of shape class
     public Shape(String shapeName, long resourceId, long position) {
@@ -65,21 +66,31 @@ public class Shape {
 
     //shape list adapter to bind listview containing all shapes
     public  static class ShapeListAdapter extends ArrayAdapter<Shape> {
-
-        public ShapeListAdapter(Activity context, ArrayList<Shape> shapes) {
+        int shapeSel = 0;
+        public ShapeListAdapter(Activity context, ArrayList<Shape> shapes ,int shapeSelector) {
             super(context, 0, shapes);
+            shapeSel = shapeSelector;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View listItemView = convertView;
             if (listItemView == null) {
+                if(shapeSel ==1)
                 listItemView = LayoutInflater.from(getContext()).inflate(
                         R.layout.shapes_list, parent, false);
+                else if (shapeSel==2)
+                    listItemView = LayoutInflater.from(getContext()).inflate(
+                            R.layout.additional_shapes_list, parent, false);
             }
             Shape shape = getItem(position);
-            ImageView shapeImage = (ImageView) listItemView.findViewById(R.id.shape);
-            shapeImage.setImageResource((int) shape.getResourceId());
+            ImageView shapeImage = null;
+            if(shapeSel ==1)
+                shapeImage = listItemView.findViewById(R.id.shape);
+            else if (shapeSel ==2)
+                shapeImage = listItemView.findViewById(R.id.additional_shape);
+            if(shapeImage!=null)
+                shapeImage.setImageResource((int) shape.getResourceId());
             return listItemView;
         }
 

@@ -6,7 +6,8 @@
     android:padding="10dp">
     <!--   square solid-->
     <ImageView
-        android:id="@+id/shape"
+        android:id="@+id/additional_shape"
+        android:rotation="45"
         android:layout_width="35dp"
         android:layout_height="35dp"/>
 </LinearLayout>
