@@ -172,6 +172,15 @@ public class DrawAndPaint extends AppCompatActivity {
             }
         });
 
+        ImageButton redoButton =  findViewById(R.id.btnRedo);
+        redoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawingView.RedoDrawing();
+            }
+        });
+
+
         ImageButton resetButton =  findViewById(R.id.btnClearAll);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override

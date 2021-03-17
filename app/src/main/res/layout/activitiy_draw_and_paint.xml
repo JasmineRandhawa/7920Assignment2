@@ -182,15 +182,21 @@
             android:layout_width="50dp"
             android:layout_height="55dp"
             android:layout_gravity="start"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="17dp"
             android:background="@drawable/undo" />
+
+        <ImageButton
+            android:id="@+id/btnRedo"
+            android:layout_width="50dp"
+            android:layout_height="55dp"
+            android:layout_marginLeft="120dp"
+            android:background="@drawable/redo" />
 
         <ImageButton
             android:id="@+id/btnClearAll"
             android:layout_width="50dp"
             android:layout_height="55dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginLeft="200dp"
+            android:layout_marginLeft="120dp"
             android:background="@drawable/reset" />
 
         <ImageButton
@@ -198,7 +204,7 @@
             android:layout_width="50dp"
             android:layout_height="55dp"
             android:layout_gravity="end"
-            android:layout_marginLeft="200dp"
+            android:layout_marginLeft="120dp"
             android:background="@drawable/save" />
 
     </LinearLayout>

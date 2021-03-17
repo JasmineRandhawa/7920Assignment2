@@ -40,6 +40,7 @@ public class DrawView extends View {
 
     private List<PathPoint> pointList;
     private Path mPath;
+    PathData prevPathData = null;
 
     private int mStartX;
     private int mStartY;
@@ -417,6 +418,7 @@ public class DrawView extends View {
         if (pdList != null && pdList.size() > 0) {
             mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
+            prevPathData = pdList.get(pdList.size() - 1);
             pdList.remove(pdList.size() - 1);
             if (mBitmap != null) {
                     for (PathData pd :pdList) {
@@ -434,7 +436,36 @@ public class DrawView extends View {
             }
             invalidate();
         }
+        else
+            prevPathData= null;
     }
+
+    // undo drawing steps
+    public void RedoDrawing() {
+        if (pdList != null && pdList.size() > 0 && prevPathData != null) {
+            mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mBitmap);
+            pdList.add(prevPathData);
+            if (mBitmap != null) {
+                for (PathData pd :pdList) {
+                    List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                    finalPoints.addAll(pd.getPathPointList());
+                    int selectecColor = pd.getSelectedColor();
+                    if (pd.getIsFill())
+                        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                    else
+                        mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setColor(selectecColor);
+                    mCanvas.drawPath(pd.getPath(), mPaint);
+                }
+                mCanvas.drawBitmap(mBitmap, 0, 0, null);
+            }
+            invalidate();
+            prevPathData= null;
+        }
+
+    }
+
 
     //save drawing
     public  String saveDrawing() throws FileNotFoundException {
