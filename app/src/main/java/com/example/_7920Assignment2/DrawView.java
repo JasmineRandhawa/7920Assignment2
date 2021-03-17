@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Environment;
@@ -53,6 +52,8 @@ public class DrawView extends View {
     private boolean isSquare = false;
     private boolean isCircle = false;
     private boolean isCustom = false;
+    private boolean isRhombus = false;
+    List<Path> pList = new ArrayList<>();
     private String drawingMode;
     private String selectedShape;
     private int selectedColor = -1;
@@ -81,27 +82,6 @@ public class DrawView extends View {
         drawingMode = drawingModeString;
     }
 
-    //set shape and fill-unfill
-    public void SetShape(String shapeString) {
-        selectedShape = shapeString;
-        isLine = selectedShape.equals(Shape.Line);
-        isCustom = selectedShape.equals(Shape.Custom);
-        isTriangle = selectedShape.equals(Shape.TriangleStroke) || selectedShape.equals(Shape.TriangleSolid);
-        isCircle = selectedShape.equals(Shape.CircleStroke) || selectedShape.equals(Shape.CircleSolid);
-        isSquare = selectedShape.equals(Shape.SquareStroke) || selectedShape.equals(Shape.SquareSolid);
-
-        if ( selectedShape.equals(Shape.Line) ||
-            selectedShape.equals(Shape.TriangleStroke)||
-            selectedShape.equals(Shape.CircleStroke) ||
-            selectedShape.equals(Shape.SquareStroke) ||
-            selectedShape.equals(Shape.Custom))
-            isFill = false;
-        else if (selectedShape.equals(Shape.TriangleSolid) ||
-                selectedShape.equals(Shape.CircleSolid) ||
-                selectedShape.equals(Shape.SquareSolid))
-            isFill = true;
-    }
-
     // set paint color
     public void SetPaintColor(int color) {
         selectedColor = color;
@@ -112,7 +92,7 @@ public class DrawView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         this.setDrawingCacheEnabled(true);
-        mBitmap = Bitmap.createBitmap(500, 800, Bitmap.Config.ARGB_8888);
+        mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
     }
 
@@ -120,6 +100,7 @@ public class DrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
         if (mBitmap != null) {
             if(pdList!=null && pdList.size()>0) {
 
@@ -143,8 +124,8 @@ public class DrawView extends View {
             mPaint.setColor(selectedColor);
             canvas.drawPath(mPath, mPaint);
             canvas.drawBitmap(mBitmap, 0, 0, null);
-            invalidate();
         }
+        invalidate();
     }
 
 
@@ -171,16 +152,38 @@ public class DrawView extends View {
         toastCountDown.start();
     }
 
-    int startx,starty;
-    int left=0,right=0,top=0,bottom=0;
+    //set shape and fill-unfill
+    public void SetShape(String shapeString) {
+        selectedShape = shapeString;
+        isLine = selectedShape.equals(Shape.Line);
+        isCustom = selectedShape.equals(Shape.Custom);
+        isTriangle = selectedShape.equals(Shape.TriangleStroke) || selectedShape.equals(Shape.TriangleSolid);
+        isCircle = selectedShape.equals(Shape.CircleStroke) || selectedShape.equals(Shape.CircleSolid);
+        isSquare = selectedShape.equals(Shape.SquareStroke) || selectedShape.equals(Shape.SquareSolid);
+        isRhombus = selectedShape.equals(Shape.RhombusStroke) || selectedShape.equals(Shape.RhombusSolid);
+
+        if (selectedShape.equals(Shape.Line) ||
+                selectedShape.equals(Shape.TriangleStroke) ||
+                selectedShape.equals(Shape.CircleStroke) ||
+                selectedShape.equals(Shape.SquareStroke) ||
+                selectedShape.equals(Shape.Custom) ||
+                selectedShape.equals(Shape.RhombusStroke))
+            isFill = false;
+        else if (selectedShape.equals(Shape.TriangleSolid) ||
+                selectedShape.equals(Shape.CircleSolid) ||
+                selectedShape.equals(Shape.SquareSolid)||
+                selectedShape.equals(Shape.RhombusSolid))
+            isFill = true;
+    }
+
     // on touch event
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if(selectedColor == -1) {
+        if (selectedColor == -1) {
             ShowAlert("Please select color!");
-            return  true;
+            return true;
         }
 
         int x = (int) event.getX();
@@ -231,7 +234,7 @@ public class DrawView extends View {
                     if (selectedShape.equals(Shape.Line))
                         pointList.add(new PathPoint(mStartX, mStartY));
                     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-                        if (selectedShape.equals(Shape.Line)) {
+                        if (isLine) {
                             mEndX = x;
                             mEndY = y;
                             mPath.lineTo(mEndX, mEndY);
@@ -251,6 +254,11 @@ public class DrawView extends View {
                         mEndY = (int) event.getY();
                         List<PathPoint> cornerPoints = MyPointClass.GetPathCornersTriangle(mPath);
                         DrawTriangle(cornerPoints);
+                    } else if (isRhombus) {
+                        mEndX = (int) event.getX();
+                        mEndY = (int) event.getY();
+                        List<PathPoint> cornerPoints = MyPointClass.GetPathCornersRhombus(mPath);
+                        DrawRhombus(cornerPoints);
                     }
                    /* else if (isSquare) {
                         mEndX = (int) event.getX();
@@ -303,7 +311,7 @@ public class DrawView extends View {
                     else if (isCircle)
                         mPath.addCircle(mStartX, mStartY, distance/2, Path.Direction.CW);
                     else if (isSquare)
-                        mPath.addRect(mStartX, mStartY, mEndX+distance, mEndY+distance, Path.Direction.CW);
+                        mPath.addRect(mStartX, mStartY, mEndX+distance/2, mEndY+distance/2, Path.Direction.CW);
                     else if (selectedShape.equals(Shape.Line)) {
                         mPath.moveTo(mStartX, mStartY);
                         mPath.lineTo(mEndX, mEndY);
@@ -351,7 +359,20 @@ public class DrawView extends View {
     // Draw free hand Triangle
     public void DrawTriangle(List<PathPoint> cornerPoints)
     {
-        if (cornerPoints != null && cornerPoints.size()  == 3) {
+        if (cornerPoints != null && cornerPoints.size() == 3) {
+            Path pathObj = new Path();
+            pathObj.moveTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
+            for (int i = 1; i <= cornerPoints.size() - 1; i++) {
+                pathObj.lineTo(cornerPoints.get(i).getX(), cornerPoints.get(i).getY());
+            }
+            pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
+            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+        }
+    }
+
+    // Draw free hand Rhombus
+    public void DrawRhombus(List<PathPoint> cornerPoints) {
+        if (cornerPoints != null && cornerPoints.size() == 4) {
             Path pathObj = new Path();
             pathObj.moveTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
             for (int i = 1; i <= cornerPoints.size() - 1; i++) {
@@ -363,16 +384,16 @@ public class DrawView extends View {
     }
 
     // Draw free hand Square
-    public void DrawSquare()
-    {
+    public void DrawSquare() {
 
         PathPoint pathMidpoint = MyPointClass.CalculatePathMidPoint(mPath);
         PathPoint circleCenterPoint = MyPointClass.CalculateCircleCenter(mStartX, pathMidpoint.getX(), mStartY, pathMidpoint.getY());
-        float radius =  MyPointClass.DistanceBetweenTwoPoints(mStartX, circleCenterPoint.getX(), mStartY, circleCenterPoint.getY());
-        mPath= new Path();
+        float radius = MyPointClass.DistanceBetweenTwoPoints(mStartX, circleCenterPoint.getX(), mStartY, circleCenterPoint.getY());
+        mPath = new Path();
         Path path = new Path();
-        path.addRect((float)circleCenterPoint.getX() - radius,(float)circleCenterPoint.getY()-radius ,
-                (float)circleCenterPoint.getX()+radius ,(float)circleCenterPoint.getY()+radius , Path.Direction.CW);
+        radius = 3*radius/4;
+        path.addRect((float) circleCenterPoint.getX() - radius, (float) circleCenterPoint.getY() - radius,
+                (float) circleCenterPoint.getX() + radius, (float) circleCenterPoint.getY() + radius, Path.Direction.CW);
         List<PathPoint> finalPoints = new ArrayList<>();
         finalPoints.add(new PathPoint(mStartX, mStartY));
         finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
@@ -394,7 +415,7 @@ public class DrawView extends View {
     // undo drawing steps
     public void UndoDrawing() {
         if (pdList != null && pdList.size() > 0) {
-            mBitmap = Bitmap.createBitmap(500, 800, Bitmap.Config.ARGB_8888);
+            mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
             pdList.remove(pdList.size() - 1);
             if (mBitmap != null) {

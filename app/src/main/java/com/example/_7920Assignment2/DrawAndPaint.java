@@ -36,6 +36,8 @@ public class DrawAndPaint extends AppCompatActivity {
     String selectedColor = Color.GREEN + "";
     Shape selectedShapeListItem;
     ArrayList<Shape> shapes;
+    ArrayList<Shape> additional_shapes;
+    boolean isAutomatic = false;
 
     //add shapes, color palette , drawing view and clear button
     @Override
@@ -43,13 +45,17 @@ public class DrawAndPaint extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activitiy_draw_and_paint);
         context = getApplicationContext();
-        shapes= new ArrayList<Shape>();
+        shapes= new ArrayList<>();
+        additional_shapes= new ArrayList<>();
 
         //add color pallette to layout
         CreateColorPalette();
 
         //add shappes listview to the screen
         CreateShapesView();
+
+        //add addtional shappes listview to the screen
+        CreateAddtionalShapesView();
 
         //add drawing view to the screen
         CreateDrawingView();
@@ -77,15 +83,15 @@ public class DrawAndPaint extends AppCompatActivity {
 
     //add  shapes palette  to screen
     private void CreateShapesView() {
-        shapes.add(new Shape(Shape.Line, R.drawable.line, 0));
-        shapes.add(new Shape(Shape.SquareSolid, R.drawable.square_solid, 1));
-        shapes.add(new Shape(Shape.SquareStroke, R.drawable.square_stroke, 2));
-        shapes.add(new Shape(Shape.CircleSolid, R.drawable.circle_solid, 3));
-        shapes.add(new Shape(Shape.CircleStroke, R.drawable.circle_stroke, 4));
-        shapes.add(new Shape(Shape.TriangleSolid, R.drawable.triangle_solid, 5));
-        shapes.add(new Shape(Shape.TriangleStroke, R.drawable.triangle_stroke, 6));
-
-        Shape.ShapeListAdapter shapesAdapter = new Shape.ShapeListAdapter(this, shapes);
+       shapes = new ArrayList<>();
+       shapes.add(new Shape(Shape.Line, R.drawable.line, 0));
+       shapes.add(new Shape(Shape.SquareSolid, R.drawable.square_solid, 1));
+       shapes.add(new Shape(Shape.SquareStroke, R.drawable.square_stroke, 2));
+       shapes.add(new Shape(Shape.CircleSolid, R.drawable.circle_solid, 3));
+       shapes.add(new Shape(Shape.CircleStroke, R.drawable.circle_stroke, 4));
+       shapes.add(new Shape(Shape.TriangleSolid, R.drawable.triangle_solid, 5));
+       shapes.add(new Shape(Shape.TriangleStroke, R.drawable.triangle_stroke, 6));
+        Shape.ShapeListAdapter shapesAdapter = new Shape.ShapeListAdapter(this, shapes,1);
         ListView listview_shapes = (ListView) findViewById(R.id.listview_shapes);
         listview_shapes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
@@ -93,9 +99,31 @@ public class DrawAndPaint extends AppCompatActivity {
                 drawingView.SetShape(selectedShapeListItem.getShapeName());
                 LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
                 freeHandImage.setBackgroundColor(Color.WHITE);
+                CreateAddtionalShapesView();
             }
         });
         listview_shapes.setAdapter(shapesAdapter);
+    }
+
+    //add  shapes palette  to screen
+    private void CreateAddtionalShapesView() {
+        if(isAutomatic == false) {
+            ListView additional_listview_shapes = findViewById(R.id.listview_additional_shapes);
+            additional_listview_shapes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> list, View lv, int position, long id) {
+                    selectedShapeListItem = Shape.GetItemForAtPosition(position, additional_shapes);
+                    drawingView.SetShape(selectedShapeListItem.getShapeName());
+                    LinearLayout freeHandImage = findViewById(R.id.layoutPencil);
+                    freeHandImage.setBackgroundColor(Color.WHITE);
+                    CreateShapesView();
+                }
+            });
+            additional_shapes = new ArrayList<>();
+            additional_shapes.add(new Shape(Shape.RhombusStroke, R.drawable.square_stroke, 0));
+            additional_shapes.add(new Shape(Shape.RhombusSolid, R.drawable.square_solid, 1));
+            Shape.ShapeListAdapter addtionalShapesAdapter = new Shape.ShapeListAdapter(this, additional_shapes, 2);
+            additional_listview_shapes.setAdapter(addtionalShapesAdapter);
+        }
     }
 
     //add  drawng view  to screen
@@ -168,6 +196,36 @@ public class DrawAndPaint extends AppCompatActivity {
                 RadioButton radioDrawingModeButton =  findViewById(selectedId);
                 String drawingMode = radioDrawingModeButton.getText().toString();
                 drawingView.SetDrawingMode(drawingMode);
+                if(drawingMode.equals(Shape.AutomaticDrawingmMode))
+                {
+                    isAutomatic = true;
+                    CreateShapesView();
+                    ListView shapeslistView = findViewById(R.id.listview_shapes);
+                    shapeslistView.setSelection(0);
+                    shapeslistView.setSelected(true);
+                    shapeslistView.setItemChecked(0,true);
+                    ListView listView = findViewById(R.id.listview_additional_shapes);
+                    listView.setVisibility(View.GONE);
+                    ImageButton pencil = findViewById(R.id.btnPencil);
+                    pencil.setVisibility(View.GONE);
+                    LinearLayout pencilLayout = findViewById(R.id.layoutPencil);
+                    pencilLayout.setVisibility(View.GONE);
+                    drawingView.SetShape(Shape.Line);
+                }
+                else  if(drawingMode.equals(Shape.FreeHandDrawingMode))
+                {
+                    isAutomatic = false;
+                    ListView listView = findViewById(R.id.listview_additional_shapes);
+                    listView.setVisibility(View.VISIBLE);
+                    CreateShapesView();
+                    CreateAddtionalShapesView();
+                    ImageButton pencil = findViewById(R.id.btnPencil);
+                    pencil.setVisibility(View.VISIBLE);
+                    LinearLayout pencilLayout = findViewById(R.id.layoutPencil);
+                    pencilLayout.setVisibility(View.VISIBLE);
+                    drawingView.SetShape(Shape.Custom);
+                    pencilLayout.setBackgroundColor(Color.BLUE);
+                }
             }
         });
         ((RadioButton)radioGroupDrawingMode.getChildAt(0)).setChecked(true);

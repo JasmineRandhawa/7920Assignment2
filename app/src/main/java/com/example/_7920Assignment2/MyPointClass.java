@@ -2,8 +2,6 @@ package com.example._7920Assignment2;
 
 import android.graphics.Path;
 import android.graphics.PathMeasure;
-import android.graphics.Rect;
-import android.graphics.RectF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,6 +152,66 @@ public class MyPointClass {
     }
 
     // get Path corners
+    public static List<PathPoint> GetPathCornersRhombus(Path path) {
+        List<PathPoint> cornerPoints = new ArrayList<PathPoint>();
+        List<PathPoint> newPointList = MyPointClass.GetPoints(path);
+        newPointList = MyPointClass.RemoveDuplicates(newPointList);
+        if (newPointList != null && newPointList.size() > 0) {
+            PathPoint firstPoint = newPointList.get(0);
+            List<PathPoint> pointList = new ArrayList<>();
+            //pointList.add(newPointList.get(0));
+            // first 10 points
+            for (int i = 10; i <= newPointList.size() - 1; i++) {
+                pointList.add(newPointList.get(i));
+            }
+            // find direction of triangle
+            PathPoint initialPointOfPath = new PathPoint(pointList.get(pointList.size() / 10).getX(),
+                    pointList.get(pointList.size() / 10).getY());
+
+            boolean isRightDirection = initialPointOfPath.getX() > firstPoint.getX();
+            boolean isTopDirection = initialPointOfPath.getY() < firstPoint.getY();
+
+            //add first corner of path
+            cornerPoints.add(firstPoint);
+            List<PathPoint> nextList = null;
+            //find second corner of path
+            PathPoint secondCorner = GetNextCorner(pointList, 1, isRightDirection, isTopDirection);
+            PathPoint thirdCorner = null, fourthCorner;
+            if (secondCorner != null) {
+                int indexOfSecondCornerInList = secondCorner.getPointIndex();
+                cornerPoints.add(secondCorner);
+                //find third corner of path
+                nextList = MyPointClass.GetNextList(indexOfSecondCornerInList, pointList);
+                if (nextList != null && nextList.size() > 0) {
+                    initialPointOfPath = new PathPoint(nextList.get(nextList.size() / 5).getX(),
+                            nextList.get(nextList.size() / 5).getY());
+                    isRightDirection = initialPointOfPath.getX() > secondCorner.getX();
+                    isTopDirection = initialPointOfPath.getY() < secondCorner.getY();
+                    thirdCorner = GetNextCorner(nextList, 1, isRightDirection, isTopDirection);
+                    if (thirdCorner != null)
+                        cornerPoints.add(thirdCorner);
+                }
+            }
+
+            if (thirdCorner != null) {
+                int indexOfSecondCornerInList = thirdCorner.getPointIndex();
+                //find third corner of path
+                List<PathPoint> nextListForFourth = MyPointClass.GetNextList(indexOfSecondCornerInList, nextList);
+                if (nextListForFourth != null && nextListForFourth.size() > 0) {
+                    initialPointOfPath = new PathPoint(nextListForFourth.get(nextListForFourth.size() / 5).getX(),
+                            nextListForFourth.get(nextListForFourth.size() / 5).getY());
+                    isRightDirection = initialPointOfPath.getX() > thirdCorner.getX();
+                    isTopDirection = initialPointOfPath.getY() < thirdCorner.getY();
+                    fourthCorner = GetNextCorner(nextListForFourth, 2, isRightDirection, isTopDirection);
+                    if (fourthCorner != null)
+                        cornerPoints.add(fourthCorner);
+                }
+            }
+        }
+        return cornerPoints;
+    }
+
+    // get Path corners
     public static List<PathPoint> GetPathCornersTriangle(Path path) {
         List<PathPoint> cornerPoints = new ArrayList<PathPoint>();
         List<PathPoint> newPointList = MyPointClass.GetPoints(path);
@@ -237,5 +295,4 @@ public class MyPointClass {
         }
         return currentPoint;
     }
-
 }

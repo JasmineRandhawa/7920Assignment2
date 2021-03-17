@@ -3,11 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="10dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
     <!--   square solid-->
-    <ImageView
-        android:id="@+id/additional_shape"
-        android:rotation="45"
-        android:layout_width="35dp"
-        android:layout_height="35dp"/>
+
+        <ImageView
+            android:id="@+id/additional_shape"
+            android:rotationX="-200"
+            android:rotationY="-35"
+            android:layout_width="35dp"
+            android:layout_height="45dp" />
 </LinearLayout>

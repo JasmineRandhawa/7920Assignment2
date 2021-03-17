@@ -85,38 +85,59 @@
 
             <LinearLayout
                 android:id="@+id/layoutPencil"
-                android:layout_width="75dp"
-                android:layout_height="65dp"
+                android:layout_width="60dp"
+                android:layout_height="55dp"
                 android:layout_marginRight="1.5dp"
                 android:background="@android:color/white"
                 android:orientation="horizontal"
-                android:paddingTop="10dp"
-                android:paddingRight="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="5dp"
                 android:paddingBottom="10dp"
-                android:paddingLeft="20dp">
+                android:paddingLeft="5dp">
 
                 <ImageButton
                     android:id="@+id/btnPencil"
-                    android:layout_width="40dp"
-                    android:layout_height="45dp"
+                    android:layout_width="35dp"
+                    android:layout_height="40dp"
                     android:background="@drawable/pencil"/>
             </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="75dp"
-                android:layout_height="2dp"
+
+                android:layout_width="60dp"
+                android:layout_height="1dp"
                 android:background="@color/LightGrey">
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ListView
                 android:id="@+id/listview_shapes"
-                android:layout_width="75dp"
-                android:layout_height="610dp"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
                 android:choiceMode="singleChoice"
                 android:listSelector="@color/Blue"
-                android:paddingBottom="10dp" />
+                android:paddingBottom="5dp" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="60dp"
+                android:layout_height="1dp"
+                android:background="@color/LightGrey">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <ListView
+                android:id="@+id/listview_additional_shapes"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:choiceMode="singleChoice"
+                android:listSelector="@color/Blue"
+                android:paddingBottom="5dp" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="60dp"
+                android:layout_height="1dp"
+                android:background="@color/LightGrey">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
 
@@ -129,7 +150,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/drawingViewLayout"
-            android:layout_width="510.95dp"
+            android:layout_width="527.95dp"
             android:layout_height="610dp"
             android:background="@android:color/white">
 
