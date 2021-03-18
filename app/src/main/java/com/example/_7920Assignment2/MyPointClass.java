@@ -4,6 +4,7 @@ import android.graphics.Path;
 import android.graphics.PathMeasure;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /* Contains generic functions */
@@ -36,6 +37,27 @@ public class MyPointClass {
                 isInList = true;
         }
         return isInList;
+    }
+
+    //  to find minimum value in a list
+    public static Integer findMax(List<Integer> list)
+    {
+        if (list == null || list.size() == 0) {
+            return 0;
+        }
+        List<Integer> sortedList = new ArrayList<>(list);
+        Collections.sort(sortedList);
+        return sortedList.get(sortedList.size()-1);
+    }
+    //  to find minimum value in a list
+    public static Integer findMin(List<Integer> list)
+    {
+        if (list == null || list.size() == 0) {
+            return 0;
+        }
+        List<Integer> sortedList = new ArrayList<>(list);
+        Collections.sort(sortedList);
+        return sortedList.get(0);
     }
 
     //get point list after second point of triangle
@@ -170,14 +192,67 @@ public class MyPointClass {
 
             boolean isRightDirection = initialPointOfPath.getX() > firstPoint.getX();
             boolean isTopDirection = initialPointOfPath.getY() < firstPoint.getY();
-
+            boolean prevTop = isTopDirection;
             //add first corner of path
             cornerPoints.add(firstPoint);
             List<PathPoint> nextList = null;
             //find second corner of path
             PathPoint secondCorner = GetNextCorner(pointList, 1, isRightDirection, isTopDirection);
-            PathPoint thirdCorner = null, fourthCorner;
+            PathPoint thirdCorner = null, fourthCorner = null;
+            List<Integer> xCoordinateList,yCoordinateList;
             if (secondCorner != null) {
+                int indexOfSecondCornerInList = secondCorner.getPointIndex();
+                cornerPoints.add(secondCorner);
+                xCoordinateList = new ArrayList<>();
+                yCoordinateList = new ArrayList<>();;
+                //find third corner of path
+                nextList = MyPointClass.GetNextList(indexOfSecondCornerInList, pointList);
+                List<PathPoint> pList = new ArrayList<>();
+                pList.add(secondCorner);
+                pList.addAll(nextList);
+                String direction = CheckDirection(pList);
+
+                isTopDirection = direction.equals("lefttop")|| direction.equals("righttop");
+                isRightDirection = direction.equals("righttop")|| direction.equals("rightbottom");
+                PathPoint thirdPoint = GetNextCorner(nextList, 2, isRightDirection, isTopDirection);
+                int thirdPointIndex = 0;
+                if (thirdPoint != null)
+                    thirdPointIndex = thirdPoint.PointIndex;
+                if (nextList != null && nextList.size() > 0) {
+                        for (int i = 0; i <= thirdPointIndex; i++) {
+                            xCoordinateList.add(nextList.get(i).getX());
+                            yCoordinateList.add(nextList.get(i).getY());
+                    }
+                    int minX = MyPointClass.findMin(xCoordinateList);
+                    int minY = MyPointClass.findMin(yCoordinateList);
+                    int maxX = MyPointClass.findMax(xCoordinateList);
+                    int maxY = MyPointClass.findMax(yCoordinateList);
+                    int diffXRight = secondCorner.getX()>maxX?secondCorner.getX()-maxX:maxX-secondCorner.getX();
+                    int diffXLeft = secondCorner.getX()>minX?secondCorner.getX()-minX:minX-secondCorner.getX();
+                    if(isRightDirection && !isTopDirection)
+                    thirdCorner = new PathPoint(maxX,maxY);
+                    else if(isRightDirection && isTopDirection)
+                        thirdCorner = new PathPoint(maxX,minY);
+                    else if(!isRightDirection && !isTopDirection)
+                        thirdCorner = new PathPoint(minX,maxY);
+                    else if(!isRightDirection && isTopDirection)
+                        thirdCorner = new PathPoint(minX,minY);
+                    if(thirdCorner!=null)
+                    cornerPoints.add(thirdCorner);
+                    int secondLineLengthY = !isTopDirection ? thirdCorner.getY() - secondCorner.getY():secondCorner.getY() - thirdCorner.getY();
+                    if(isRightDirection && isTopDirection)
+                    fourthCorner = new PathPoint(firstPoint.getX()+diffXRight,firstPoint.getY()-secondLineLengthY);
+                    else if(isRightDirection && !isTopDirection)
+                        fourthCorner = new PathPoint(firstPoint.getX()+diffXRight,firstPoint.getY()+secondLineLengthY);
+                    else  if(!isRightDirection && isTopDirection)
+                        fourthCorner = new PathPoint(firstPoint.getX()-diffXLeft,firstPoint.getY()-secondLineLengthY);
+                    else if(!isRightDirection && !isTopDirection)
+                        fourthCorner = new PathPoint(firstPoint.getX()-diffXLeft,firstPoint.getY()+secondLineLengthY);
+                    if(fourthCorner!=null)
+                    cornerPoints.add(fourthCorner);
+                }
+            }
+            /*if (secondCorner != null) {
                 int indexOfSecondCornerInList = secondCorner.getPointIndex();
                 cornerPoints.add(secondCorner);
                 //find third corner of path
@@ -206,7 +281,7 @@ public class MyPointClass {
                     if (fourthCorner != null)
                         cornerPoints.add(fourthCorner);
                 }
-            }
+            }*/
         }
         return cornerPoints;
     }

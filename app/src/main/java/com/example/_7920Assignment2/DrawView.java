@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -177,6 +178,7 @@ public class DrawView extends View {
             isFill = true;
     }
 
+    List<Integer> xCoordinateList,yCoordinateList;
     // on touch event
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -221,7 +223,60 @@ public class DrawView extends View {
             }
             return true;
         }
-        else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) ) {
+        else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) && isSquare ) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mStartX = (int) event.getX();
+                    mStartY = (int) event.getY();
+                    mPath = new Path();
+                    xCoordinateList = new ArrayList<>();
+                    yCoordinateList = new ArrayList<>();;
+                    xCoordinateList.add(mStartX);
+                    yCoordinateList.add(mStartY);
+                    mPath.moveTo(mStartX, mStartY);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    float dx = Math.abs(mStartX - mEndX);
+                    float dy = Math.abs(mStartY - mEndY);
+                    if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                            mEndX = x;
+                            mEndY = y;
+                            mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
+                    }
+
+                    if (!isLine) {
+                        mStartX = x;
+                        mStartY = y;
+                    }
+                    xCoordinateList.add(mEndX);
+                    yCoordinateList.add(mEndY);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mPath = new Path();
+                    List<PathPoint> cornerPoints = new ArrayList<>();
+                    int minX = MyPointClass.findMin(xCoordinateList);
+                    int minY = MyPointClass.findMin(yCoordinateList);
+                    int maxX = MyPointClass.findMax(xCoordinateList);
+                    int maxY = MyPointClass.findMax(yCoordinateList);
+                    cornerPoints.add(new PathPoint(minX,minY));
+                    cornerPoints.add(new PathPoint(maxX,minY));
+                    cornerPoints.add(new PathPoint(maxX,maxY));
+                    cornerPoints.add(new PathPoint(minX,maxY));
+                    DrawRectangle(cornerPoints);
+                    invalidate();
+                    xCoordinateList = new ArrayList<>();
+                    yCoordinateList = new ArrayList<>();;
+                    break;
+
+                default:
+                    return false;
+            }
+            return true;
+
+        }
+        else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) && !isSquare ) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();
@@ -411,6 +466,18 @@ public class DrawView extends View {
         }*/
     }
 
+    // Draw free hand Rectangle
+    public void DrawRectangle(List<PathPoint> cornerPoints) {
+        if (cornerPoints != null && cornerPoints.size() == 4) {
+            Path pathObj = new Path();
+            pathObj.moveTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
+            for (int i = 1; i <= cornerPoints.size() - 1; i++) {
+                pathObj.lineTo(cornerPoints.get(i).getX(), cornerPoints.get(i).getY());
+            }
+            pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
+            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+        }
+    }
 
 
     // undo drawing steps
@@ -440,7 +507,7 @@ public class DrawView extends View {
             prevPathData= null;
     }
 
-    // undo drawing steps
+    // undo drawing steps-
     public void RedoDrawing() {
         if (prevPathData != null) {
             mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
