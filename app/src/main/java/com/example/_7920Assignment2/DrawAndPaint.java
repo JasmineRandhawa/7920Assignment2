@@ -164,6 +164,16 @@ public class DrawAndPaint extends AppCompatActivity {
             }
         });
 
+        ImageButton eraseButton =  findViewById(R.id.btnErase);
+        eraseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               CreateShapesView();
+               CreateAddtionalShapesView();
+                drawingView.SetShape(Shape.Eraser);
+            }
+        });
+
         ImageButton undoButton =  findViewById(R.id.btnUndo);
         undoButton.setOnClickListener(new View.OnClickListener() {
             @Override

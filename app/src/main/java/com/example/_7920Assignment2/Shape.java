@@ -24,6 +24,7 @@ public class Shape {
     public static String RhombusSolid = "Rhombus Solid";
     public static String RhombusStroke = "Rhombus Stroke";
     public static String Line = "Line";
+    public static String Eraser = "Eraser";
     public static String Custom = "Custom";
     public static String FreeHandDrawingMode = "Free Hand";
     public static String AutomaticDrawingmMode = "Automatic";

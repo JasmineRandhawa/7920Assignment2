@@ -25,6 +25,10 @@ public class PathData {
         return Path;
     }
 
+    // getters and setter for Path data class fields
+    public void setPath(Path path) {
+        this.Path = path;
+    }
 
     public List<PathPoint> getPathPointList() {
         return PathPointList;
