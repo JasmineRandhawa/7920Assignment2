@@ -3,17 +3,14 @@ package com.example._7920Assignment2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,7 +23,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,12 +42,13 @@ public class DrawView extends View {
 
     private List<PathPoint> pointList;
     private Path mPath;
-    PathData prevPathData = null;
+    PathData prevPathData;
 
     private int mStartX;
     private int mStartY;
     private int mEndX;
     private int mEndY;
+    private int longPressTimer = 2000;
 
     private boolean isFill = false;
     private boolean isLine = false;
@@ -60,29 +57,12 @@ public class DrawView extends View {
     private boolean isCircle = false;
     private boolean isCustom = false;
     private boolean isRhombus = false;
-    List<Path> pList = new ArrayList<>();
+    private boolean isErase = false;
+    List<Integer> xCoordinateList, yCoordinateList;
     private String drawingMode;
     private String selectedShape;
-    private int selectedColor = -1;
-
-
-    //constructor
-    public DrawView(Context cntxt) {
-        super(cntxt);
-        context = cntxt;
-        selectedShape = Shape.Custom;
-        drawingMode = Shape.FreeHandDrawingMode;
-        mPath = new Path();
-        pdList = new ArrayList<>();
-        pointList = new ArrayList<>();
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setDither(true);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setStrokeWidth(12);
-    }
+    private int selectedColor ;
+    private List<PathData> removedPaths;
 
     //set drawwing mode
     public void SetDrawingMode(String drawingModeString) {
@@ -92,6 +72,11 @@ public class DrawView extends View {
     // set paint color
     public void SetPaintColor(int color) {
         selectedColor = color;
+    }
+
+    // set  erasor
+    public void SetEraser(boolean isErase) {
+        isErase = isErase;
     }
 
     // Ui refresh of screem
@@ -158,6 +143,32 @@ public class DrawView extends View {
         toast.show();
         toastCountDown.start();
     }
+    private boolean addFlag = false;
+    private boolean removeFlag = false;
+    private int mX, mY;
+    private long startTime = 0;
+    private long endTime = 0;
+
+
+    //constructor
+    public DrawView(Context cntxt) {
+        super(cntxt);
+        context = cntxt;
+        selectedShape = Shape.Custom;
+        selectedColor = -1;
+        drawingMode = Shape.FreeHandDrawingMode;
+        removedPaths = new ArrayList<>();
+        mPath = new Path();
+        pdList = new ArrayList<>();
+        pointList = new ArrayList<>();
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setDither(true);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setStrokeWidth(12);
+    }
 
     //set shape and fill-unfill
     public void SetShape(String shapeString) {
@@ -178,13 +189,106 @@ public class DrawView extends View {
             isFill = false;
         else if (selectedShape.equals(Shape.TriangleSolid) ||
                 selectedShape.equals(Shape.CircleSolid) ||
-                selectedShape.equals(Shape.SquareSolid)||
+                selectedShape.equals(Shape.SquareSolid) ||
                 selectedShape.equals(Shape.RhombusSolid))
             isFill = true;
 
     }
 
-    List<Integer> xCoordinateList,yCoordinateList;
+    public List<PathPoint> GetPoints() {
+        List<PathPoint> points = new ArrayList<>();
+        int ydiff = mEndY - mStartY, xdiff = mEndX - mStartY;
+        double slope = (double) (mEndY - mStartY) / (mEndX - mStartX);
+        double x, y;
+        int quantity = 200;
+
+        --quantity;
+
+        for (double i = 0; i < quantity; i++) {
+            y = slope == 0 ? 0 : ydiff * (i / quantity);
+            x = slope == 0 ? xdiff * (i / quantity) : y / slope;
+            points.add(new PathPoint((int) Math.round(x) + mStartX, (int) Math.round(y) + mStartY));
+        }
+        points.add(new PathPoint(mEndX, mEndY));
+        return points;
+    }
+
+    public boolean CheckPointContainedInLine(PathPoint p, boolean breakFromLoop)
+    {
+        for (int i = 0; i <= 50; i++) {
+            iloop:
+            if (breakFromLoop)
+                break iloop;
+            for (int j = 0; j <= 50; j++) {
+                jloop:
+                if (breakFromLoop) break jloop;
+                if ((p.x == mX + i && p.y == mY + j) ||
+                        (p.x == mX + i && p.y == mY - j) || (p.x == mX - i && p.y == mY + j) ||
+                        (p.x == mX - i && p.y == mY - j) || (p.x == mX + i && p.y == mY) ||
+                        (p.x == mX - i && p.y == mY) || (p.x == mX && p.y == mY - j) ||
+                        (p.x == mX && p.y == mY + j)) {
+                    breakFromLoop = true;
+                }
+            }
+        }
+        return breakFromLoop;
+    }
+
+
+    public void Erasepaths() {
+        if (endTime - startTime > longPressTimer || isErase) {
+            startTime = 0;
+            endTime = 0;
+
+            if (pdList != null && pdList.size() > 0) {
+                for (PathData pd : pdList) {
+                    if (pd.getPath() != null) {
+                        if (!isLine && !isCustom) {
+                            RectF rectF = new RectF();
+                            pd.getPath().computeBounds(rectF, true);
+                            Region r = new Region();
+                            r.setPath(pd.getPath(), new Region((int) rectF.left, (int) rectF.top, (int) rectF.right, (int) rectF.bottom));
+                            if (r.contains(mX, mY)) {
+                                removedPaths.add(pd);
+                            }
+                        } else if (isLine || isCustom) {
+                            boolean breakFromLoop = false;
+                            List<PathPoint> points = pd.getPathPointList();
+                            //points= MyPointClass.RemoveDuplicates(points);
+                            for (int index = 0; index <= points.size() - 1; index++) {
+                                pointloop:
+                                if (breakFromLoop) break pointloop;
+                                PathPoint p = points.get(index);
+                                boolean isContains= CheckPointContainedInLine(p, breakFromLoop);
+                                if (isContains) {
+                                    pd.setPathIndex(index);
+                                    if(removedPaths.size()>0) {
+                                        for (PathData pdd : removedPaths)
+                                            if (pdd.getPathIndex() != index)
+                                                removedPaths.add(pd);
+                                    }
+                                    else
+                                        removedPaths.add(pd);
+                                    breakFromLoop = true;
+                                }
+                            }
+
+                        }
+                    }
+                }
+                for (PathData pdd : removedPaths) {
+                    pdList.remove(pdd);
+                    mPath=new Path();
+                    invalidate();
+                    if(isErase)
+                        isErase=false;
+                    break;
+                }
+                //removedPaths = new ArrayList<>();
+            }
+        }
+    }
+
     // on touch event
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -194,89 +298,48 @@ public class DrawView extends View {
             ShowAlert("Please select color!");
             return true;
         }
-
-        int x = (int) event.getX();
-        int y = (int) event.getY();
-
-        if (selectedShape.equals(Shape.Eraser))
-        {
-            List<PathData> removedPaths = new ArrayList<>();
-            if(pdList!=null && pdList.size()>0) {
-                for (PathData pd :pdList) {
-                    if(pd.getPath()!=null) {
-                        RectF rectF = new RectF();
-                        pd.getPath().computeBounds(rectF, true);
-                        Region r = new Region();
-                        r.setPath(pd.getPath(), new Region((int) rectF.left, (int) rectF.top, (int) rectF.right, (int) rectF.bottom));
-                        if(r.contains(x,y))
-                        {
-                            Path path = new Path();
-                            path.addRect(rectF, Path.Direction.CW);
-                            pd.setPath(path);
-                            pd.setSelectedColor(Color.WHITE);
-                        }
-                        boolean breakFromLoop = false;
-                        List<PathPoint> points = pd.getPathPointList();
-                        //points= MyPointClass.RemoveDuplicates(points);
-                        for(int index = 0; index<=points.size()-1;index++) {
-                            PathPoint p = points.get(index);
-                            for (int i = 0; i <= 50; i++) {
-                                iloop:
-                                if(breakFromLoop)
-                                    break iloop ;
-                                for (int j = 0; j <= 50; j++) {
-                                    jloop:
-                                    if(breakFromLoop) break jloop;
-                                    if ((p.x == x + i && p.y==y + j) ||
-                                            (p.x == x + i && p.y==y - j) || (p.x == x - i && p.y==y + j) ||
-                                             (p.x == x - i && p.y==y - j) || (p.x == x + i && p.y == y) ||
-                                             (p.x == x - i && p.y == y) || (p.x == x  && p.y == y-j) ||
-                                            (p.x == x  && p.y == y+j)) {
-                                        breakFromLoop = true;
-                                    }
-                                }
-                            }
-                            if(breakFromLoop)
-                            {
-                                removedPaths.add(pd);
-                                breakFromLoop = false;
-                            }
-                        }
-
-                    }
-                }
-            }
-            for(PathData pdd :removedPaths) {
-                prevPathData = pdd;
-                pdList.remove(pdd);
-                invalidate();
-            }
+        if (selectedShape.equals("")&& !isErase) {
+            ShowAlert("Please select shape!");
             return true;
         }
-
-        else if (isCustom)
-        {
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        mX = x;
+        mY = y;
+        if(isErase) {
+        Erasepaths();
+        }
+        else if (isCustom) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();
                     mStartY = (int) event.getY();
+                    startTime = event.getEventTime();
+                    mPath = new Path();
                     mPath.moveTo(mStartX, mStartY);
                     invalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    endTime = 0;
                     float dx = Math.abs(mStartX - mEndX);
                     float dy = Math.abs(mStartY - mEndY);
                     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-                            mEndX = x;
-                            mEndY = y;
-                            mPath.lineTo(mEndX, mEndY);
+                        mEndX = x;
+                        mEndY = y;
+                        mPath.lineTo(mEndX, mEndY);
                     }
                     invalidate();
                     break;
                 case MotionEvent.ACTION_UP:
-                    List<PathPoint> pathPoints = new ArrayList<PathPoint>();
-                    pathPoints.addAll(MyPointClass.GetPoints(mPath));
-                    pdList.add(new PathData(mPath, pathPoints, selectedColor, isFill));
+                    endTime = event.getEventTime();
+                    if (endTime - startTime > longPressTimer)
+                        Erasepaths();
+                    else {
+                        List<PathPoint> pathPoints = new ArrayList<PathPoint>();
+                        pathPoints.addAll(MyPointClass.GetPoints(mPath));
+                        pdList.add(new PathData(mPath, pathPoints, selectedColor, isFill));
+                        removedPaths = new ArrayList<>();
+                    }
                     invalidate();
                     mPath = new Path();
                     break;
@@ -284,27 +347,28 @@ public class DrawView extends View {
                     return false;
             }
             return true;
-        }
-        else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) && isSquare ) {
+        } else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) && isSquare) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();
                     mStartY = (int) event.getY();
+                    startTime = event.getEventTime();
                     mPath = new Path();
                     xCoordinateList = new ArrayList<>();
-                    yCoordinateList = new ArrayList<>();;
+                    yCoordinateList = new ArrayList<>();
                     xCoordinateList.add(mStartX);
                     yCoordinateList.add(mStartY);
                     mPath.moveTo(mStartX, mStartY);
                     invalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    endTime = 0;
                     float dx = Math.abs(mStartX - mEndX);
                     float dy = Math.abs(mStartY - mEndY);
                     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-                            mEndX = x;
-                            mEndY = y;
-                            mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
+                        mEndX = x;
+                        mEndY = y;
+                        mPath.quadTo(mStartX, mStartY, (x + mStartX) / 2, (y + mStartY) / 2);
                     }
 
                     if (!isLine) {
@@ -316,20 +380,27 @@ public class DrawView extends View {
                     invalidate();
                     break;
                 case MotionEvent.ACTION_UP:
-                    mPath = new Path();
-                    List<PathPoint> cornerPoints = new ArrayList<>();
-                    int minX = MyPointClass.findMin(xCoordinateList);
-                    int minY = MyPointClass.findMin(yCoordinateList);
-                    int maxX = MyPointClass.findMax(xCoordinateList);
-                    int maxY = MyPointClass.findMax(yCoordinateList);
-                    cornerPoints.add(new PathPoint(minX,minY));
-                    cornerPoints.add(new PathPoint(maxX,minY));
-                    cornerPoints.add(new PathPoint(maxX,maxY));
-                    cornerPoints.add(new PathPoint(minX,maxY));
-                    DrawRectangle(cornerPoints);
+                    endTime = event.getEventTime();
+                    if (endTime - startTime > longPressTimer)
+                        Erasepaths();
+                    else {
+                        mPath = new Path();
+                        List<PathPoint> cornerPoints = new ArrayList<>();
+                        int minX = MyPointClass.findMin(xCoordinateList);
+                        int minY = MyPointClass.findMin(yCoordinateList);
+                        int maxX = MyPointClass.findMax(xCoordinateList);
+                        int maxY = MyPointClass.findMax(yCoordinateList);
+                        cornerPoints.add(new PathPoint(minX, minY));
+                        cornerPoints.add(new PathPoint(maxX, minY));
+                        cornerPoints.add(new PathPoint(maxX, maxY));
+                        cornerPoints.add(new PathPoint(minX, maxY));
+                        DrawRectangle(cornerPoints);
+                    }
                     invalidate();
                     xCoordinateList = new ArrayList<>();
-                    yCoordinateList = new ArrayList<>();;
+                    yCoordinateList = new ArrayList<>();
+
+
                     break;
 
                 default:
@@ -337,17 +408,18 @@ public class DrawView extends View {
             }
             return true;
 
-        }
-        else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) && !isSquare ) {
+        } else if (!isCustom && drawingMode.equals(Shape.FreeHandDrawingMode) && !isSquare) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();
                     mStartY = (int) event.getY();
+                    startTime = event.getEventTime();
                     mPath.moveTo(mStartX, mStartY);
-                    pointList.add(new PathPoint(mStartX,mStartY));
+                    pointList.add(new PathPoint(mStartX, mStartY));
                     invalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    endTime = 0;
                     float dx = Math.abs(mStartX - mEndX);
                     float dy = Math.abs(mStartY - mEndY);
                     if (selectedShape.equals(Shape.Line))
@@ -365,21 +437,25 @@ public class DrawView extends View {
                         mStartX = x;
                         mStartY = y;
                     }
-                    pointList.add(new PathPoint(mEndX,mEndY));
+                    pointList.add(new PathPoint(mEndX, mEndY));
                     invalidate();
                     break;
                 case MotionEvent.ACTION_UP:
-                    if (isTriangle) {
-                        mEndX = (int) event.getX();
-                        mEndY = (int) event.getY();
-                        List<PathPoint> cornerPoints = MyPointClass.GetPathCornersTriangle(mPath);
-                        DrawTriangle(cornerPoints);
-                    } else if (isRhombus) {
-                        mEndX = (int) event.getX();
-                        mEndY = (int) event.getY();
-                        List<PathPoint> cornerPoints = MyPointClass.GetPathCornersRhombus(mPath);
-                        DrawRhombus(cornerPoints);
-                    }
+                    endTime = event.getEventTime();
+                    if (endTime - startTime > longPressTimer)
+                        Erasepaths();
+                    else {
+                        if (isTriangle) {
+                            mEndX = (int) event.getX();
+                            mEndY = (int) event.getY();
+                            List<PathPoint> cornerPoints = MyPointClass.GetPathCornersTriangle(mPath);
+                            DrawTriangle(cornerPoints);
+                        } else if (isRhombus) {
+                            mEndX = (int) event.getX();
+                            mEndY = (int) event.getY();
+                            List<PathPoint> cornerPoints = MyPointClass.GetPathCornersRhombus(mPath);
+                            DrawRhombus(cornerPoints);
+                        }
                    /* else if (isSquare) {
                         mEndX = (int) event.getX();
                         mEndY = (int) event.getY();
@@ -388,18 +464,20 @@ public class DrawView extends View {
                         //DrawSquare(cornerPoints);
                         Path path= MyPointClass.AllignSquareLines(cornerPoints);
                         pdList.add(new PathData(path, pointList, selectedColor, isFill));
+                         removedPaths = new ArrayList<>();
                     }*/
-                   // else if (isSquare)
-                     //   DrawSquare();
-                    else if (isCircle)
-                        DrawCircle();
-                    else if(isLine)
-                    {
-                        DrawLine(pointList);
+                        // else if (isSquare)
+                        //   DrawSquare();
+                        else if (isCircle)
+                            DrawCircle();
+                        else if (isLine) {
+                            DrawLine(pointList);
+                        }
                     }
                     mPath = new Path();
                     pointList = new ArrayList<>();
                     invalidate();
+
                     break;
 
                 default:
@@ -407,45 +485,51 @@ public class DrawView extends View {
             }
             return true;
 
-        } else if (!isCustom &&  drawingMode.equals(Shape.AutomaticDrawingmMode)) {
+        } else if (!isCustom && drawingMode.equals(Shape.AutomaticDrawingmMode)) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mStartX = (int) event.getX();
                     mStartY = (int) event.getY();
-                    pointList.add(new PathPoint(mStartX,mStartY));
+                    startTime = event.getEventTime();
+                    pointList.add(new PathPoint(mStartX, mStartY));
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    endTime = 0;
                     mEndX = (int) event.getX();
                     mEndY = (int) event.getY();
-                    pointList.add(new PathPoint(mEndX,mEndY));
+                    pointList.add(new PathPoint(mEndX, mEndY));
                     break;
                 case MotionEvent.ACTION_UP:
-                    mEndX = (int) event.getX();
-                    mEndY = (int) event.getY();
-                    Path mPath = new Path();
-                    float distance = MyPointClass.DistanceBetweenTwoPoints(mStartX,  mEndX,mStartY, mEndY);
-                    if (isTriangle) {
-                        int radius = (int) MyPointClass.CalculateRadius(mStartX, mStartY, mEndX, mEndY);
-                        mPath.reset();
-                        mPath.moveTo(mStartX, mStartY - radius);
-                        mPath.lineTo(mStartX - radius, mStartY + radius);
-                        mPath.lineTo(mStartX + radius, mStartY + radius);
-                        mPath.lineTo(mStartX, mStartY - radius);
-                        mPath.close();
+                    endTime = event.getEventTime();
+                    if (endTime - startTime > longPressTimer)
+                        Erasepaths();
+                    else {
+                        mEndX = (int) event.getX();
+                        mEndY = (int) event.getY();
+                        Path mPath = new Path();
+                        float distance = MyPointClass.DistanceBetweenTwoPoints(mStartX, mEndX, mStartY, mEndY);
+                        if (isTriangle) {
+                            int radius = (int) MyPointClass.CalculateRadius(mStartX, mStartY, mEndX, mEndY);
+                            mPath.reset();
+                            mPath.moveTo(mStartX, mStartY - radius);
+                            mPath.lineTo(mStartX - radius, mStartY + radius);
+                            mPath.lineTo(mStartX + radius, mStartY + radius);
+                            mPath.lineTo(mStartX, mStartY - radius);
+                            mPath.close();
+                        } else if (isCircle)
+                            mPath.addCircle(mStartX, mStartY, distance / 2, Path.Direction.CW);
+                        else if (isSquare)
+                            mPath.addRect(mStartX, mStartY, mEndX + distance / 2, mEndY + distance / 2, Path.Direction.CW);
+                        else if (selectedShape.equals(Shape.Line)) {
+                            mPath.moveTo(mStartX, mStartY);
+                            mPath.lineTo(mEndX, mEndY);
+                        }
+                        if (isLine) {
+                            pointList = GetPoints();
+                        }
+                        pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
+                        removedPaths = new ArrayList<>();
                     }
-                    else if (isCircle)
-                        mPath.addCircle(mStartX, mStartY, distance/2, Path.Direction.CW);
-                    else if (isSquare)
-                        mPath.addRect(mStartX, mStartY, mEndX+distance/2, mEndY+distance/2, Path.Direction.CW);
-                    else if (selectedShape.equals(Shape.Line)) {
-                        mPath.moveTo(mStartX, mStartY);
-                        mPath.lineTo(mEndX, mEndY);
-                    }
-                    if(isLine)
-                    {
-                        pointList = GetPoints();
-                    }
-                    pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
                     pointList = new ArrayList<>();
                     invalidate();
                     break;
@@ -457,23 +541,6 @@ public class DrawView extends View {
         return true;
     }
 
-    public List<PathPoint> GetPoints() {
-        List<PathPoint> points = new ArrayList<>();
-        int ydiff = mEndY - mStartY, xdiff = mEndX - mStartY;
-        double slope = (double)(mEndY - mStartY) / (mEndX - mStartX);
-        double x, y;
-        int quantity=200;
-
-        --quantity;
-
-        for (double i = 0; i < quantity; i++) {
-            y = slope == 0 ? 0 : ydiff * (i / quantity);
-            x = slope == 0 ? xdiff * (i / quantity) : y / slope;
-            points.add( new PathPoint((int)Math.round(x) + mStartX, (int)Math.round(y) +mStartY));
-        }
-        points.add(new PathPoint(mEndX,mEndY));
-        return points;
-    }
     // Draw free hand Line
     public void DrawLine(List<PathPoint> finalPoints)
     {
@@ -481,6 +548,7 @@ public class DrawView extends View {
         path.moveTo(mStartX, mStartY);
         path.lineTo(mEndX, mEndY);
         pdList.add(new PathData(path, GetPoints(), selectedColor, isFill));
+        removedPaths = new ArrayList<>();
     }
 
     // Draw free hand Circle
@@ -495,6 +563,7 @@ public class DrawView extends View {
         finalPoints.add(new PathPoint(mStartX, mStartY));
         finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
         pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
+        removedPaths = new ArrayList<>();
     }
 
     // Draw free hand Triangle
@@ -508,6 +577,7 @@ public class DrawView extends View {
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
             pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+            removedPaths = new ArrayList<>();
         }
     }
 
@@ -521,6 +591,7 @@ public class DrawView extends View {
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
             pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+            removedPaths = new ArrayList<>();
         }
     }
 
@@ -539,6 +610,7 @@ public class DrawView extends View {
         finalPoints.add(new PathPoint(mStartX, mStartY));
         finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
         pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
+        removedPaths = new ArrayList<>();
 
        /* if (cornerPoints != null && cornerPoints.size()  == 4) {
             Path pathObj = new Path();
@@ -548,6 +620,7 @@ public class DrawView extends View {
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
             pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+             removedPaths = new ArrayList<>();
         }*/
     }
 
@@ -561,67 +634,73 @@ public class DrawView extends View {
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
             pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+            removedPaths = new ArrayList<>();
         }
     }
 
-
     // undo drawing steps
     public void UndoDrawing() {
+
+        if (removedPaths.size() > 0) {
+            PathData erasePathData = removedPaths.get(removedPaths.size() - 1);
+            if (erasePathData != null) {
+                pdList.add(erasePathData);
+                erasePathData = null;
+                removedPaths = new ArrayList<>();
+                addFlag = true;
+            }
+        } else if (pdList.size() > 0) {
+            prevPathData = pdList.get(pdList.size() - 1);
+            pdList.remove(pdList.size() - 1);
+            removeFlag = true;
+        }
         mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
-        if (prevPathData != null){
-            pdList.add(prevPathData);
-        prevPathData = null;
-    }
-            else {
-                prevPathData = pdList.get(pdList.size() - 1);
-                pdList.remove(pdList.size() - 1);
+        if (mBitmap != null) {
+            for (PathData pd : pdList) {
+                List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                finalPoints.addAll(pd.getPathPointList());
+                int selectecColor = pd.getSelectedColor();
+                if (pd.getIsFill())
+                    mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                else
+                    mPaint.setStyle(Paint.Style.STROKE);
+                mPaint.setColor(selectecColor);
+                mCanvas.drawPath(pd.getPath(), mPaint);
             }
-            if (mBitmap != null) {
-                    for (PathData pd :pdList) {
-                        List<PathPoint> finalPoints = new ArrayList<PathPoint>();
-                        finalPoints.addAll(pd.getPathPointList());
-                        int selectecColor = pd.getSelectedColor();
-                        if (pd.getIsFill())
-                            mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-                        else
-                            mPaint.setStyle(Paint.Style.STROKE);
-                        mPaint.setColor(selectecColor);
-                        mCanvas.drawPath(pd.getPath(), mPaint);
-                    }
-                mCanvas.drawBitmap(mBitmap, 0, 0, null);
-            }
-            invalidate();
+            mCanvas.drawBitmap(mBitmap, 0, 0, null);
+        }
+        invalidate();
     }
 
     // undo drawing steps-
     public void RedoDrawing() {
-        if (prevPathData != null) {
-            mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
-            mCanvas = new Canvas(mBitmap);
-            if( prevPathData!=null) {
-                pdList.add(prevPathData);
-                prevPathData = null;
-            }
-            else {
-                pdList.remove(pdList.size() - 1);
-            }
-            if (mBitmap != null) {
-                for (PathData pd :pdList) {
-                    List<PathPoint> finalPoints = new ArrayList<PathPoint>();
-                    finalPoints.addAll(pd.getPathPointList());
-                    int selectecColor = pd.getSelectedColor();
-                    if (pd.getIsFill())
-                        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-                    else
-                        mPaint.setStyle(Paint.Style.STROKE);
-                    mPaint.setColor(selectecColor);
-                    mCanvas.drawPath(pd.getPath(), mPaint);
-                }
-                mCanvas.drawBitmap(mBitmap, 0, 0, null);
-            }
-            invalidate();
+        mBitmap = Bitmap.createBitmap(525, 610, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
+        if (removeFlag) {
+            pdList.add(prevPathData);
+            prevPathData = null;
+            ;
+            removeFlag = false;
+        } else if (addFlag) {
+            pdList.remove(pdList.size() - 1);
+            addFlag = false;
         }
+        if (mBitmap != null) {
+            for (PathData pd : pdList) {
+                List<PathPoint> finalPoints = new ArrayList<PathPoint>();
+                finalPoints.addAll(pd.getPathPointList());
+                int selectecColor = pd.getSelectedColor();
+                if (pd.getIsFill())
+                    mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                else
+                    mPaint.setStyle(Paint.Style.STROKE);
+                mPaint.setColor(selectecColor);
+                mCanvas.drawPath(pd.getPath(), mPaint);
+            }
+            mCanvas.drawBitmap(mBitmap, 0, 0, null);
+        }
+        invalidate();
 
     }
 

@@ -9,6 +9,7 @@ public class PathData {
 
     Path Path ;
     List<PathPoint> PathPointList ;
+    int PathIndex;
     int SelectedColor;
     boolean IsFill;
 
@@ -25,7 +26,13 @@ public class PathData {
         return Path;
     }
 
-    // getters and setter for Path data class fields
+    public int getPathIndex() {
+        return this.PathIndex;
+    }
+    public void setPathIndex(int pathIndex) {
+        this.PathIndex = pathIndex;
+    }
+
     public void setPath(Path path) {
         this.Path = path;
     }

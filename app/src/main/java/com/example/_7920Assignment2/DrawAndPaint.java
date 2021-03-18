@@ -100,6 +100,7 @@ public class DrawAndPaint extends AppCompatActivity {
                 LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
                 freeHandImage.setBackgroundColor(Color.WHITE);
                 CreateAddtionalShapesView();
+                drawingView.SetEraser(false);
             }
         });
         listview_shapes.setAdapter(shapesAdapter);
@@ -116,6 +117,7 @@ public class DrawAndPaint extends AppCompatActivity {
                     LinearLayout freeHandImage = findViewById(R.id.layoutPencil);
                     freeHandImage.setBackgroundColor(Color.WHITE);
                     CreateShapesView();
+                    drawingView.SetEraser(false);
                 }
             });
             additional_shapes = new ArrayList<>();
@@ -168,9 +170,12 @@ public class DrawAndPaint extends AppCompatActivity {
         eraseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               CreateShapesView();
-               CreateAddtionalShapesView();
-                drawingView.SetShape(Shape.Eraser);
+                LinearLayout freeHandImage =  findViewById(R.id.layoutPencil);
+                freeHandImage.setBackgroundColor(Color.WHITE);
+                CreateAddtionalShapesView();
+                CreateShapesView();
+                drawingView.SetShape("");
+                drawingView.SetEraser(true);
             }
         });
 
