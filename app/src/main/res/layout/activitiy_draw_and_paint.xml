@@ -176,35 +176,35 @@
         android:background="@android:color/holo_blue_light"
         android:orientation="horizontal"
         android:padding="5dp">
-
+<!--
         <ImageButton
             android:id="@+id/btnErase"
             android:layout_width="70dp"
             android:layout_height="55dp"
             android:layout_gravity="start"
             android:layout_marginLeft="17dp"
-            android:background="@drawable/eraser" />
+            android:background="@drawable/eraser" />-->
 
         <ImageButton
             android:id="@+id/btnUndo"
             android:layout_width="50dp"
             android:layout_height="55dp"
             android:layout_gravity="start"
-            android:layout_marginLeft="70dp"
+            android:layout_marginLeft="17dp"
             android:background="@drawable/undo" />
 
         <ImageButton
             android:id="@+id/btnRedo"
             android:layout_width="50dp"
             android:layout_height="55dp"
-            android:layout_marginLeft="70dp"
+            android:layout_marginLeft="120dp"
             android:background="@drawable/redo" />
 
         <ImageButton
             android:id="@+id/btnClearAll"
             android:layout_width="50dp"
             android:layout_height="55dp"
-            android:layout_marginLeft="70dp"
+            android:layout_marginLeft="120dp"
             android:background="@drawable/reset" />
 
         <ImageButton
@@ -212,7 +212,7 @@
             android:layout_width="50dp"
             android:layout_height="55dp"
             android:layout_gravity="end"
-            android:layout_marginLeft="70dp"
+            android:layout_marginLeft="120dp"
             android:background="@drawable/save" />
 
     </LinearLayout>
