@@ -254,6 +254,7 @@ public class DrawAndPaint extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 CreateShapesView();
+                CreateAddtionalShapesView();
                 drawingView.SetShape(Shape.Custom);
                 customPencilImage.setBackgroundColor(Color.BLUE);
             }
