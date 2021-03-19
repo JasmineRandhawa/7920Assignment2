@@ -149,16 +149,19 @@ public class DrawAndPaint extends AppCompatActivity {
                         File folder = new File(Environment.getExternalStorageDirectory().getPath()
                                 + File.separator + "Pictures" + File.separator);
                         File[] allFiles = folder.listFiles();
-                        if(allFiles!=null && allFiles.length>0) {
-                            File imageFile = allFiles[allFiles.length - 2];
-                            File lastFile = allFiles[allFiles.length - 1];
-                            lastFile.delete();
-                            new SingleMediaScanner(context, imageFile);
+                        if(allFiles!=null) {
+                            if (allFiles != null && allFiles.length > 0) {
+                                File imageFile = allFiles[allFiles.length - 2];
+                                File lastFile = allFiles[allFiles.length - 1];
+                                lastFile.delete();
+                                new SingleMediaScanner(context, imageFile);
+                            }
                         }
                     }
                     else
                         Toast.makeText(context, "Error in saving", Toast.LENGTH_SHORT).show();
                 } catch (FileNotFoundException e) {
+                    String error =e.getMessage();
                     Toast.makeText(context, "Error in saving", Toast.LENGTH_SHORT).show();
                 }
             }

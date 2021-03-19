@@ -257,7 +257,9 @@ public class DrawView extends View {
             if (pdList != null && pdList.size() > 0) {
                 for (PathData pd : pdList) {
                     if (pd.getPath() != null) {
-                        if (!isLine && !isCustom && !isTriangle) {
+                        if (!pd.getSelectedShape().equals(Shape.TriangleSolid) && !pd.getSelectedShape().equals(Shape.TriangleStroke)
+                        && !pd.getSelectedShape().equals(Shape.Line)
+                        && !pd.getSelectedShape().equals(Shape.Custom)) {
                             RectF rectF = new RectF();
                             pd.getPath().computeBounds(rectF, true);
                             Region r = new Region();
@@ -266,14 +268,14 @@ public class DrawView extends View {
                                 removedPaths.add(pd);
                             }
                         }
-                        else if(isTriangle)
+                        else if(pd.getSelectedShape().equals(Shape.TriangleSolid) || pd.getSelectedShape().equals(Shape.TriangleStroke))
                         {
                           List<PathPoint> corners = pd.getPathPointList();
                            boolean isInTriangle =  IsInTriangle(new PathPoint(mX,mY),corners.get(0),corners.get(1),corners.get(2));
                             if (isInTriangle)
                                 removedPaths.add(pd);
                         }
-                        else if (isLine || isCustom) {
+                        else if (pd.getSelectedShape().equals(Shape.Line) || pd.getSelectedShape().equals(Shape.Custom)) {
                             boolean breakFromLoop = false;
                             List<PathPoint> points = pd.getPathPointList();
                            if(points!=null && points.size()>0) {
@@ -366,7 +368,7 @@ public class DrawView extends View {
                     else {
                         List<PathPoint> pathPoints = new ArrayList<PathPoint>();
                         pathPoints.addAll(MyPointClass.GetPoints(mPath));
-                        pdList.add(new PathData(mPath, pathPoints, selectedColor, isFill));
+                        pdList.add(new PathData(mPath, pathPoints, selectedColor, isFill,selectedShape));
                         removedPaths = new ArrayList<>();
                     }
                     invalidate();
@@ -549,22 +551,22 @@ public class DrawView extends View {
                             pointList.add(new PathPoint(mStartX, mStartY - radius));
                             pointList.add(new PathPoint(mStartX - radius, mStartY + radius));
                             pointList.add(new PathPoint(mStartX + radius, mStartY + radius));
-                            pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
+                            pdList.add(new PathData(mPath, pointList, selectedColor, isFill,selectedShape));
 
                         } else if (isCircle) {
                             mPath.addCircle(mStartX, mStartY, distance / 2, Path.Direction.CW);
-                            pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
+                            pdList.add(new PathData(mPath, pointList, selectedColor, isFill,selectedShape));
                             pointList = new ArrayList<>();
                         }
                         else if (isSquare) {
                             mPath.addRect(mStartX, mStartY, mEndX + distance / 2, mEndY + distance / 2, Path.Direction.CW);
-                            pdList.add(new PathData(mPath, pointList, selectedColor, isFill));
+                            pdList.add(new PathData(mPath, pointList, selectedColor, isFill,selectedShape));
                             pointList = new ArrayList<>();
                         }
                         else if (isLine) {
                             mPath.moveTo(mStartX, mStartY);
                             mPath.lineTo(mEndX, mEndY);
-                            pdList.add(new PathData(mPath, GetPoints(), selectedColor, isFill));
+                            pdList.add(new PathData(mPath, GetPoints(), selectedColor, isFill,selectedShape));
                             pointList = new ArrayList<>();
                         }
                     }
@@ -585,7 +587,7 @@ public class DrawView extends View {
         Path path = new Path();
         path.moveTo(mStartX, mStartY);
         path.lineTo(mEndX, mEndY);
-        pdList.add(new PathData(path, GetPoints(), selectedColor, isFill));
+        pdList.add(new PathData(path, GetPoints(), selectedColor, isFill,selectedShape));
         removedPaths = new ArrayList<>();
     }
 
@@ -600,7 +602,7 @@ public class DrawView extends View {
         List<PathPoint> finalPoints = new ArrayList<>();
         finalPoints.add(new PathPoint(mStartX, mStartY));
         finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
-        pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
+        pdList.add(new PathData(path, finalPoints, selectedColor, isFill,selectedShape));
         removedPaths = new ArrayList<>();
     }
 
@@ -614,7 +616,7 @@ public class DrawView extends View {
                 pathObj.lineTo(cornerPoints.get(i).getX(), cornerPoints.get(i).getY());
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
-            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill,selectedShape));
             removedPaths = new ArrayList<>();
         }
     }
@@ -628,7 +630,7 @@ public class DrawView extends View {
                 pathObj.lineTo(cornerPoints.get(i).getX(), cornerPoints.get(i).getY());
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
-            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill,selectedShape));
             removedPaths = new ArrayList<>();
         }
     }
@@ -647,7 +649,7 @@ public class DrawView extends View {
         List<PathPoint> finalPoints = new ArrayList<>();
         finalPoints.add(new PathPoint(mStartX, mStartY));
         finalPoints.add(new PathPoint(circleCenterPoint.getX(), circleCenterPoint.getY()));
-        pdList.add(new PathData(path, finalPoints, selectedColor, isFill));
+        pdList.add(new PathData(path, finalPoints, selectedColor, isFill,selectedShape));
         removedPaths = new ArrayList<>();
 
        /* if (cornerPoints != null && cornerPoints.size()  == 4) {
@@ -671,7 +673,7 @@ public class DrawView extends View {
                 pathObj.lineTo(cornerPoints.get(i).getX(), cornerPoints.get(i).getY());
             }
             pathObj.lineTo(cornerPoints.get(0).getX(), cornerPoints.get(0).getY());
-            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill));
+            pdList.add(new PathData(pathObj, cornerPoints, selectedColor, isFill,selectedShape));
             removedPaths = new ArrayList<>();
         }
     }
@@ -756,8 +758,10 @@ public class DrawView extends View {
         }
         if (targetDir.isDirectory()) {
             String[] children = targetDir.list();
-            for (int i = 0; i < children.length; i++) {
-                new File(targetDir, children[i]).delete();
+            if(children!=null) {
+                for (int i = 0; i < children.length; i++) {
+                    new File(targetDir, children[i]).delete();
+                }
             }
         }
         Date date = Calendar.getInstance().getTime();
@@ -773,6 +777,7 @@ public class DrawView extends View {
                                            "drawing", "drawing");
             Toast.makeText(context, "Drawing Saved", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
+            String error =e.getMessage();
             Toast.makeText(context, "Error in saving", Toast.LENGTH_LONG).show();
             return "";
         } finally {
@@ -780,6 +785,7 @@ public class DrawView extends View {
                 fos.close();
                 return fileName;
             } catch (IOException e) {
+                String error =e.getMessage();
                 Toast.makeText(context, "Error in saving", Toast.LENGTH_LONG).show();
                 return "";
             }

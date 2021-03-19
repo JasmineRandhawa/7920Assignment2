@@ -12,18 +12,24 @@ public class PathData {
     int PathIndex;
     int SelectedColor;
     boolean IsFill;
+    String SelectedShape ;
 
     //constructor
-    public PathData(Path path,List<PathPoint> pathPointList,  int selectedColor, boolean isFill) {
+    public PathData(Path path,List<PathPoint> pathPointList,  int selectedColor, boolean isFill, String selectedShape) {
         this.Path = path;
         this.PathPointList = pathPointList;
         this.SelectedColor = selectedColor;
         this.IsFill = isFill;
+        this.SelectedShape = selectedShape;
     }
 
     // getters and setter for Path data class fields
     public Path getPath() {
         return Path;
+    }
+
+    public String getSelectedShape() {
+        return SelectedShape;
     }
 
     public int getPathIndex() {
